@@ -15,8 +15,10 @@
 #include "../build_macros.h"
 #include "../memory.hpp"
 
-#if defined(_Z_OS_WINDOWS)
+#ifdef _Z_OS_WINDOWS
 #   include <WinSock2.h>
+#else
+#   include <sys/socket.h>
 #endif
 
 namespace zed {
@@ -68,6 +70,19 @@ public:
     {
         sockaddr *addr = reinterpret_cast<sockaddr *>(const_cast<sockaddr_in *>(&addr_in));
         return ::bind(get(), addr, sizeof(sockaddr_in)) != SOCKET_ERROR;
+    }
+    bool connect(const sockaddr_in &addr_in)
+    {
+        sockaddr *addr = reinterpret_cast<sockaddr *>(const_cast<sockaddr_in *>(&addr_in));
+        return ::connect(get(), addr, sizeof(sockaddr_in)) != SOCKET_ERROR;
+    }
+    bool listen(int backlog)
+    {
+        return ::listen(get(), backlog) != SOCKET_ERROR;
+    }
+    bool setopt(int level, int name, int val)
+    {
+        return ::setsockopt(get(), level, name, reinterpret_cast<char *>(&name), sizeof(int)) != SOCKET_ERROR;
     }
 private:
 #ifndef _Z_OS_WINDOWS
