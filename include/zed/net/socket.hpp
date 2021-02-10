@@ -59,36 +59,39 @@ public:
     using unique_resource::operator bool;
     operator socket_t() const { return get(); }
 
-    bool open(int af, int type, int protocol)
-    {
-        reset(::socket(af, type, protocol));
-        return is_valid(get());
-    }
+    bool open(int af, int type, int protocol);
     void close(void) { reset(); }
 
-    bool bind(const sockaddr_in &addr_in)
-    {
-        sockaddr *addr = reinterpret_cast<sockaddr *>(const_cast<sockaddr_in *>(&addr_in));
-        return ::bind(get(), addr, sizeof(sockaddr_in)) != SOCKET_ERROR;
-    }
-    bool connect(const sockaddr_in &addr_in)
-    {
-        sockaddr *addr = reinterpret_cast<sockaddr *>(const_cast<sockaddr_in *>(&addr_in));
-        return ::connect(get(), addr, sizeof(sockaddr_in)) != SOCKET_ERROR;
-    }
-    bool listen(int backlog)
-    {
-        return ::listen(get(), backlog) != SOCKET_ERROR;
-    }
-    bool setopt(int level, int name, int val)
-    {
-        return ::setsockopt(get(), level, name, reinterpret_cast<char *>(&name), sizeof(int)) != SOCKET_ERROR;
-    }
+    bool bind(const sockaddr_in &addr_in);
+    bool connect(const sockaddr_in &addr_in);
+    bool listen(int backlog) { return ::listen(get(), backlog) != SOCKET_ERROR; }
+    bool setopt(int level, int name, int val) { return ::setsockopt(get(), level, name, reinterpret_cast<char *>(&name), sizeof(int)) != SOCKET_ERROR; }
 private:
 #ifndef _Z_OS_WINDOWS
     static constexpr int SOCKET_ERROR = -1;
 #endif
 };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Implementations
+
+bool socket::open(int af, int type, int protocol)
+{
+    reset(::socket(af, type, protocol));
+    return is_valid(get());
+}
+
+bool socket::bind(const sockaddr_in &addr_in)
+{
+    sockaddr *addr = reinterpret_cast<sockaddr *>(const_cast<sockaddr_in *>(&addr_in));
+    return ::bind(get(), addr, sizeof(sockaddr_in)) != SOCKET_ERROR;
+}
+
+bool socket::connect(const sockaddr_in &addr_in)
+{
+    sockaddr *addr = reinterpret_cast<sockaddr *>(const_cast<sockaddr_in *>(&addr_in));
+    return ::connect(get(), addr, sizeof(sockaddr_in)) != SOCKET_ERROR;
+}
 
 } // namespace zed
 
