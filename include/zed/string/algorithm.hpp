@@ -56,14 +56,14 @@ void trim(std::basic_string<CharT> *s);
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Implementations
 
-template <typename String, typename Chars = ascii_whitespace<typename String::value_type>>
+template <typename String, typename Chars>
 String trim_left(const String &s)
 {
     size_t p = s.find_first_not_of(Chars::chars);
     return String::npos != p ? s.substr(p) : s;
 }
 
-template <typename CharT, typename Chars = ascii_whitespace<CharT>>
+template <typename CharT, typename Chars>
 void trim_left(std::basic_string<CharT> *s)
 {
     std::basic_string_view<CharT> v = stov(*s);
@@ -75,14 +75,14 @@ void trim_left(std::basic_string<CharT> *s)
     }
 }
 
-template <typename String, typename Chars = ascii_whitespace<typename String::value_type>>
+template <typename String, typename Chars>
 String trim_right(const String &s)
 {
     size_t p = s.find_last_not_of(Chars::chars);
     return String::npos != p ? s.substr(0, p + 1) : String();
 }
 
-template <typename CharT, typename Chars = ascii_whitespace<CharT>>
+template <typename CharT, typename Chars>
 void trim_right(std::basic_string<CharT> *s)
 {
     std::basic_string_view<CharT> v = stov(*s);
@@ -91,7 +91,7 @@ void trim_right(std::basic_string<CharT> *s)
         s->resize(v.length());
 }
 
-template <typename String, typename Chars = ascii_whitespace<typename String::value_type>>
+template <typename String, typename Chars>
 String trim(const String &s)
 {
     String r = trim_right<String, Chars>(s);
@@ -100,7 +100,7 @@ String trim(const String &s)
     return r;
 }
 
-template <typename CharT, typename Chars = ascii_whitespace<CharT>>
+template <typename CharT, typename Chars>
 void trim(std::basic_string<CharT> *s)
 {
     trim_right<CharT, Chars>(s);

@@ -75,19 +75,19 @@ private:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Implementations
 
-bool socket::open(int af, int type, int protocol)
+inline bool socket::open(int af, int type, int protocol)
 {
     reset(::socket(af, type, protocol));
     return is_valid(get());
 }
 
-bool socket::bind(const sockaddr_in &addr_in)
+inline bool socket::bind(const sockaddr_in &addr_in)
 {
     sockaddr *addr = reinterpret_cast<sockaddr *>(const_cast<sockaddr_in *>(&addr_in));
     return ::bind(get(), addr, sizeof(sockaddr_in)) != SOCKET_ERROR;
 }
 
-bool socket::connect(const sockaddr_in &addr_in)
+inline bool socket::connect(const sockaddr_in &addr_in)
 {
     sockaddr *addr = reinterpret_cast<sockaddr *>(const_cast<sockaddr_in *>(&addr_in));
     return ::connect(get(), addr, sizeof(sockaddr_in)) != SOCKET_ERROR;
