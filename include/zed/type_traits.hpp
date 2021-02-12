@@ -13,6 +13,7 @@
 #define ZED_TYPE_TRAITS_HPP
 
 #include <type_traits>
+#include "./string_view.hpp"
 
 namespace zed {
 
@@ -40,8 +41,10 @@ struct chartype_trait<const CharT[N]> { using char_type = typename CharT; };
 template <typename CharT>
 struct chartype_trait<std::basic_string<CharT>> { using char_type = typename CharT; };
 
+#ifdef _Z_STRING_VIEW_ENABLED
 template <typename CharT>
 struct chartype_trait<std::basic_string_view<CharT>> { using char_type = typename CharT; };
+#endif
 
 template <typename T1, typename T2>
 struct chartypes_same<T1, T2> { static constexpr bool value = std::is_same<chartype_trait<T1>::char_type, chartype_trait<T2>::char_type>::value; };

@@ -13,12 +13,13 @@
 #define ZED_STRING_HPP
 
 #include <string>
-#include <string_view>
 #include "./cctype.hpp"
+#include "./string_view.hpp"
 #include "./type_traits.hpp"
 
 namespace zed {
 
+#ifdef _Z_STRING_VIEW_ENABLED
 /**
  * string <-> string_view
  */
@@ -28,6 +29,7 @@ std::basic_string_view<CharT> stov(const std::basic_string<CharT> &s) { return s
 
 template <typename CharT>
 [[nodiscard]] std::basic_string<CharT> vtos(const std::basic_string_view<CharT> &s) { return std::basic_string<CharT>(s); }
+#endif
 
 /**
  * Iterator Stuff

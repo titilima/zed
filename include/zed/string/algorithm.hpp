@@ -13,6 +13,9 @@
 #define ZED_STRING_ALGORITHM_HPP
 
 #include "../string.hpp"
+#ifndef _Z_STRING_VIEW_ENABLED
+#   error TODO: Implementation for string_view?
+#endif
 
 namespace zed {
 
