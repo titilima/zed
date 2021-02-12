@@ -95,7 +95,7 @@ bool psz_iterator<CharT>::operator!=(const psz_iterator<CharT> & r) const
     return m_p != r.m_p;
 }
 
-template <typename S1, typename S2>
+template <typename S1, typename S2, typename>
 int strcmp(const S1 &s1, const S2 &s2)
 {
     auto b1 = zed::begin(s1);
