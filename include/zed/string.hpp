@@ -15,6 +15,7 @@
 #include <string>
 #include <string_view>
 #include "./cctype.hpp"
+#include "./type_traits.hpp"
 
 namespace zed {
 
@@ -23,17 +24,18 @@ namespace zed {
  */
 
 template <typename CharT>
-std::basic_string_view<CharT> stov(const std::basic_string<CharT> &s) { return std::basic_string_view<CharT>(s.data(), s.length()); }
+std::basic_string_view<CharT> stov(const std::basic_string<CharT> &s) { return std::basic_string_view<CharT>(s); }
 
 template <typename CharT>
-std::basic_string<CharT> vtos(const std::basic_string_view<CharT> &s) { return std::basic_string<CharT>(s.data(), s.length()); }
+[[nodiscard]] std::basic_string<CharT> vtos(const std::basic_string_view<CharT> &s) { return std::basic_string<CharT>(s); }
 
 /**
  * Iterator Stuff
  */
 
 template <typename CharT>
-class psz_iterator {
+class psz_iterator
+{
 public:
     explicit psz_iterator(void) = default;
     explicit psz_iterator(const CharT * psz) : m_p(psz) {}
@@ -61,16 +63,16 @@ typename String::const_iterator end(const String &s) { return s.end(); }
  * Comparisons
  */
 
-template <typename S1, typename S2>
+template <typename S1, typename S2, typename = std::enable_if<chartypes_same<S1, S2>::value>>
 int strcmp(const S1 &s1, const S2 &s2);
 
-template <typename S1, typename S2>
+template <typename S1, typename S2, typename = std::enable_if<chartypes_same<S1, S2>::value>>
 int stricmp(const S1 &s1, const S2 &s2);
 
-template <typename S1, typename S2>
+template <typename S1, typename S2, typename = std::enable_if<chartypes_same<S1, S2>::value>>
 bool strequ(const S1 &s1, const S2 &s2) { return 0 == zed::strcmp(s1, s2); }
 
-template <typename S1, typename S2>
+template <typename S1, typename S2, typename = std::enable_if<chartypes_same<S1, S2>::value>>
 bool striequ(const S1 &s1, const S2 &s2) { return 0 == zed::stricmp(s1, s2); }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -119,7 +121,7 @@ int strcmp(const S1 &s1, const S2 &s2)
     return 0;
 }
 
-template <typename S1, typename S2>
+template <typename S1, typename S2, typename>
 int stricmp(const S1 &s1, const S2 &s2)
 {
     auto b1 = zed::begin(s1);
