@@ -23,6 +23,11 @@ struct default_resource_finalizer<HANDLE>
     void operator()(HANDLE h) const { ::CloseHandle(h); }
 };
 
+struct file_handle_traits
+{
+    static constexpr HANDLE invalid_value = INVALID_HANDLE_VALUE;
+};
+
 } // namespace zed
 
 #endif // ZED_WIN_HANDLED_RESOURCE_HPP
