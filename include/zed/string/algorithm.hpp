@@ -17,6 +17,16 @@
 namespace zed {
 
 /**
+ * Replace
+ */
+
+template <typename CharT>
+std::basic_string<CharT> replace(const std::basic_string_view<CharT> &src, const std::basic_string_view<CharT> &new_sub, const std::basic_string_view<CharT> &old_sub);
+
+template <typename S1, typename S2, typename S3, typename = std::enable_if<chartypes_same<S1, S2, S2>::value>>
+std::basic_string<typename chartype_trait<S1>::char_type> replace(const S1 &src, const S2 &new_sub, const S3 &old_sub);
+
+/**
  * Trimming Stuff
  */
 
@@ -55,6 +65,32 @@ void trim(std::basic_string<CharT> *s);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Implementations
+
+template <typename CharT>
+std::basic_string<CharT> replace(const std::basic_string_view<CharT> &src, const std::basic_string_view<CharT> &new_sub, const std::basic_string_view<CharT> &old_sub)
+{
+    std::basic_string<CharT> ret;
+
+    size_t b = 0, e, l = old_sub.length();
+    while ((e = src.find(old_sub, b)) != std::basic_string_view<CharT>::npos)
+    {
+        ret.append(src, b, e - b).append(new_sub);
+        b = e + l;
+    }
+
+    l = src.length();
+    if (b < l)
+        ret.append(src, b, l - b);
+    return ret;
+}
+
+template <typename S1, typename S2, typename S3, typename>
+std::basic_string<typename chartype_trait<S1>::char_type> replace(const S1 &src, const S2 &new_sub, const S3 &old_sub)
+{
+    using char_type = typename chartype_trait<S1>::char_type;
+    using string_view_type = std::basic_string_view<char_type>;
+    return replace<char_type>(string_view_type(src), string_view_type(new_sub), string_view_type(old_sub));
+}
 
 template <typename String, typename Chars>
 String trim_left(const String &s)
