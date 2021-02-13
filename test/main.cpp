@@ -9,7 +9,13 @@
 // -------------------------------------------------
 
 #include <gtest/gtest.h>
+#include "zed/net/http_codecs.hpp"
 #include "zed/string/algorithm.hpp"
+
+TEST(HTTPDecoders, DecodesCorrectly)
+{
+    ASSERT_EQ(zed::decode_uri_component("https%3A%2F%2Fexample.org%2F"), "https://example.org/");
+}
 
 TEST(StringComparisons, ComparesCorrectly)
 {
