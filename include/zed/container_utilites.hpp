@@ -21,7 +21,7 @@ namespace zed {
 template <class C>
 struct default_container_pop_policy
 {
-    typename C::reference value_to_pop(C &c);
+    static typename C::reference value_to_pop(C &c);
 };
 
 template <class C, typename P = default_container_pop_policy<C>>
@@ -39,13 +39,13 @@ typename C::value_type pop_back(C &c);
 template <typename T>
 struct default_container_pop_policy<std::queue<T>>
 {
-    T& value_to_pop(std::queue<T> &q) { return q.front(); }
+    static T& value_to_pop(std::queue<T> &q) { return q.front(); }
 };
 
 template <typename T>
 struct default_container_pop_policy<std::stack<T>>
 {
-    T& value_to_pop(std::stack<T> &s) { return s.top(); }
+    static T& value_to_pop(std::stack<T> &s) { return s.top(); }
 };
 
 template <class C, typename P>
