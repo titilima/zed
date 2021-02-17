@@ -20,39 +20,36 @@
 
 namespace zed {
 
-class log_formatter : formatter_impl<char>
-{
-public:
-    template <typename... Args>
-    log_formatter(const char *fmt, const Args&... args);
-
-    operator const std::string& () const { return m_log; }
-private:
-    std::string m_log;
-};
-
 template <typename... Args>
 void log(const char *fmt, const Args&... args);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Implementations
 
-template <typename... Args>
-log_formatter::log_formatter(const char *fmt, const Args&... args) : formatter_impl(fmt)
+class log_formatter : formatter_impl<char>
 {
-    args_collector ac(args...);
-
-    size_t idx = 0;
-    const auto callback = [&ac, &idx](const std::string &)
+public:
+    template <typename... Args>
+    log_formatter(const char *fmt, const Args&... args) : formatter_impl(fmt)
     {
-        std::string ret;
-        if (idx < ac.size())
-            ret = ac.at(idx);
-        ++idx;
-        return ret;
-    };
-    m_log = formatter_impl::format(callback);
-}
+        args_collector ac(args...);
+
+        size_t idx = 0;
+        const auto callback = [&ac, &idx](const std::string &)
+        {
+            std::string ret;
+            if (idx < ac.size())
+                ret = ac.at(idx);
+            ++idx;
+            return ret;
+        };
+        m_log = formatter_impl::format(callback);
+    }
+
+    operator const std::string& () const { return m_log; }
+private:
+    std::string m_log;
+};
 
 template <typename... Args>
 void log(const char *fmt, const Args&... args)
