@@ -60,6 +60,7 @@ void log(const char *fmt, const Args&... args)
     log_formatter lf(fmt, args...);
 #ifdef _Z_OS_WINDOWS
     std::wstring ws = multi_byte_to_wide_string(lf);
+    ws.append(L"\r\n");
     ::OutputDebugStringW(ws.c_str());
 #endif
 }
