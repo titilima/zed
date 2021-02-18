@@ -11,6 +11,7 @@
 #include <gtest/gtest.h>
 #include "zed/net/http_codecs.hpp"
 #include "zed/string/algorithm.hpp"
+#include "zed/log.hpp"
 
 TEST(HTTPDecoders, DecodesCorrectly)
 {
@@ -24,6 +25,11 @@ TEST(StringComparisons, ComparesCorrectly)
     ASSERT_FALSE(zed::strequ("Accept", "Accept-Language"));
     ASSERT_TRUE(zed::striequ("FOO", "foo"));
     ASSERT_NE(zed::stricmp("_", "A"), zed::stricmp("_", "a"));
+}
+
+TEST(Formatters, FormatsCorrectly)
+{
+    ASSERT_EQ(std::string("Hello, 123!").compare(zed::log_formatter("{}, {}!", "Hello", 123)), 0);
 }
 
 int main(int argc, char *argv[])

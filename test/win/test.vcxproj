@@ -157,6 +157,7 @@
     <ClInclude Include="..\..\include\zed\cctype.hpp" />
     <ClInclude Include="..\..\include\zed\file\file.hpp" />
     <ClInclude Include="..\..\include\zed\file\path.hpp" />
+    <ClInclude Include="..\..\include\zed\log.hpp" />
     <ClInclude Include="..\..\include\zed\memory.hpp" />
     <ClInclude Include="..\..\include\zed\mutex.hpp" />
     <ClInclude Include="..\..\include\zed\net\http_constants.hpp" />
@@ -165,6 +166,7 @@
     <ClInclude Include="..\..\include\zed\string.hpp" />
     <ClInclude Include="..\..\include\zed\string\algorithm.hpp" />
     <ClInclude Include="..\..\include\zed\string\conv.hpp" />
+    <ClInclude Include="..\..\include\zed\string\format.hpp" />
     <ClInclude Include="..\..\include\zed\string_view.hpp" />
     <ClInclude Include="..\..\include\zed\type_traits.hpp" />
     <ClInclude Include="..\..\include\zed\win\handled_resource.hpp" />
