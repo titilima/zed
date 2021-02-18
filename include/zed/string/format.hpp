@@ -13,7 +13,6 @@
 #define ZED_STRING_FORMAT_HPP
 
 #include <functional>
-#include <string>
 #include <utility>
 #include <vector>
 #include "../string.hpp"
