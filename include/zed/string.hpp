@@ -35,31 +35,20 @@ template <typename CharT>
  * Iterator Stuff
  */
 
-template <typename CharT>
-class psz_iterator
+template <class String>
+class char_iterator
 {
 public:
-    explicit psz_iterator(void) = default;
-    explicit psz_iterator(const CharT * psz) : m_p(psz) {}
+    explicit char_iterator(const String &s) : m_it(s.begin()), m_end(s.end()) {}
 
-    CharT operator*() const { return *m_p; }
-    psz_iterator& operator++();
-    bool operator!=(const psz_iterator & r) const;
+    typename String::value_type operator*() const { return *m_it; }
+    char_iterator& operator++() { ++m_it; return *this; }
+
+    bool reach_the_end(void) const { return m_it == m_end; }
 private:
-    const CharT *m_p = nullptr;
+    typename String::const_iterator m_it;
+    const typename String::const_iterator m_end;
 };
-
-template <typename CharT>
-psz_iterator<CharT> begin(const CharT *psz) { return psz_iterator<CharT>(psz); }
-
-template <typename CharT>
-psz_iterator<CharT> end(const CharT *) { return psz_iterator<CharT>(); }
-
-template <typename String>
-typename String::const_iterator begin(const String &s) { return s.begin(); }
-
-template <typename String>
-typename String::const_iterator end(const String &s) { return s.end(); }
 
 /**
  * Comparisons
@@ -81,31 +70,42 @@ bool striequ(const S1 &s1, const S2 &s2) { return 0 == zed::stricmp(s1, s2); }
 // Implementations
 
 template <typename CharT>
-psz_iterator<CharT>& psz_iterator<CharT>::operator++()
+class char_iterator<const CharT *>
 {
-    ++m_p;
-    if ('\0' == *m_p)
-        m_p = nullptr;
-    return *this;
-}
+public:
+    explicit char_iterator(const CharT *psz) : m_p(psz) {}
 
-template <typename CharT>
-bool psz_iterator<CharT>::operator!=(const psz_iterator<CharT> & r) const
+    CharT operator*() const { return *m_p; }
+    char_iterator& operator++() { ++m_p; return *this; }
+
+    bool reach_the_end(void) const { return *m_p == '\0'; }
+private:
+    const CharT *m_p;
+};
+
+template <typename CharT, size_t N>
+class char_iterator<CharT[N]>
 {
-    return m_p != r.m_p;
-}
+public:
+    explicit char_iterator(const CharT psz[]) : m_p(psz) {}
+
+    CharT operator*() const { return *m_p; }
+    char_iterator& operator++() { ++m_p; return *this; }
+
+    bool reach_the_end(void) const { return *m_p == '\0'; }
+private:
+    const CharT *m_p;
+};
 
 template <typename S1, typename S2, typename>
 int strcmp(const S1 &s1, const S2 &s2)
 {
-    auto b1 = zed::begin(s1);
-    const auto e1 = zed::end(s1);
-    auto b2 = zed::begin(s2);
-    const auto e2 = zed::end(s2);
-    while (b1 != e1 && b2 != e2)
+    char_iterator it1(s1);
+    char_iterator it2(s2);
+    while (!it1.reach_the_end() && !it2.reach_the_end())
     {
-        auto c1 = *b1;
-        auto c2 = *b2;
+        auto c1 = *it1;
+        auto c2 = *it2;
         if (c1 != c2)
         {
             if (c1 > c2)
@@ -113,12 +113,12 @@ int strcmp(const S1 &s1, const S2 &s2)
             if (c1 < c2)
                 return -1;
         }
-        ++b1; ++b2;
+        ++it1; ++it2;
     }
 
-    if (b1 != e1)
+    if (!it1.reach_the_end())
         return 1;
-    if (b2 != e2)
+    if (!it2.reach_the_end())
         return -1;
     return 0;
 }
@@ -126,14 +126,12 @@ int strcmp(const S1 &s1, const S2 &s2)
 template <typename S1, typename S2, typename>
 int stricmp(const S1 &s1, const S2 &s2)
 {
-    auto b1 = zed::begin(s1);
-    const auto e1 = zed::end(s1);
-    auto b2 = zed::begin(s2);
-    const auto e2 = zed::end(s2);
-    while (b1 != e1 && b2 != e2)
+    char_iterator it1(s1);
+    char_iterator it2(s2);
+    while (!it1.reach_the_end() && !it2.reach_the_end())
     {
-        auto c1 = *b1;
-        auto c2 = *b2;
+        auto c1 = *it1;
+        auto c2 = *it2;
         if (c1 != c2)
         {
             if (zed::isalpha(c1) && zed::isalpha(c2))
@@ -149,12 +147,12 @@ int stricmp(const S1 &s1, const S2 &s2)
             if (c1 < c2)
                 return -1;
         }
-        ++b1; ++b2;
+        ++it1; ++it2;
     }
 
-    if (b1 != e1)
+    if (!it1.reach_the_end())
         return 1;
-    if (b2 != e2)
+    if (!it2.reach_the_end())
         return -1;
     return 0;
 }

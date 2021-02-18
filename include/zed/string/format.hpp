@@ -69,13 +69,12 @@ template <typename CharT>
 template <typename S>
 formatter_impl<CharT>::formatter_impl(const S &format)
 {
-    auto it = zed::begin(format);
-    const auto e = zed::end(format);
+    char_iterator it(format);
 
     part p;
     typename part::type next_type = part::placeholder;
     CharT flag_char = '{', next_flag_char = '}';
-    while (it != e)
+    while (!it.reach_the_end())
     {
         auto ch = *it;
         if (ch == flag_char)
