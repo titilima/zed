@@ -16,6 +16,9 @@
 #ifdef _Z_OS_WINDOWS
 #   include "./win/handled_resource.hpp"
 #endif
+#ifdef _Z_OS_POSIX
+#   include <pthread.h>
+#endif
 
 namespace zed {
 
@@ -28,7 +31,21 @@ public:
     void lock(void) { ::WaitForSingleObject(get(), INFINITE); }
     void unlock(void) { ::ReleaseMutex(get()); }
 };
-#endif
+#endif // _Z_OS_WINDOWS
+
+#ifdef _Z_OS_POSIX
+class mutex
+{
+public:
+    mutex(void) { ::pthread_mutex_init(&m_mutex, nullptr); }
+    ~mutex(void) { ::pthread_mutex_destroy(&m_mutex); }
+
+    void lock(void) { ::pthread_mutex_lock(&m_mutex); }
+    void unlock(void) { ::pthread_mutex_unlock(&m_mutex); }
+private:
+    pthread_mutex_t m_mutex;
+};
+#endif // _Z_OS_POSIX
 
 } // namespace zed
 
