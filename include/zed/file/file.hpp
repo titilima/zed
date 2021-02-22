@@ -47,7 +47,7 @@ using unique_file = unique_resource<FILE *>;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #ifdef _Z_OS_WINDOWS
-bool file::read(path_t path, std::string &dst)
+inline bool file::read(path_t path, std::string &dst)
 {
     unique_file file(::CreateFileW(path, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr));
     if (file)

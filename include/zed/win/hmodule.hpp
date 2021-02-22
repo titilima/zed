@@ -26,7 +26,7 @@ public:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Implementations
 
-std::wstring hmodule::get_file_name(HMODULE h)
+inline std::wstring hmodule::get_file_name(HMODULE h)
 {
     constexpr DWORD BUF_SIZE = MAX_PATH;
 
