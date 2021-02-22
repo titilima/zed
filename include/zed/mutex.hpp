@@ -13,16 +13,15 @@
 #define ZED_MUTEX_HPP
 
 #include "./platform_sdk.h"
-#ifdef _Z_OS_WINDOWS
+#if defined(_Z_OS_WINDOWS)
 #   include "./win/handled_resource.hpp"
-#endif
-#ifdef _Z_OS_POSIX
+#elif defined(_Z_OS_POSIX)
 #   include <pthread.h>
 #endif
 
 namespace zed {
 
-#ifdef _Z_OS_WINDOWS
+#if defined(_Z_OS_WINDOWS)
 class mutex : unique_resource<HANDLE>
 {
 public:
@@ -31,9 +30,7 @@ public:
     void lock(void) { ::WaitForSingleObject(get(), INFINITE); }
     void unlock(void) { ::ReleaseMutex(get()); }
 };
-#endif // _Z_OS_WINDOWS
-
-#ifdef _Z_OS_POSIX
+#elif defined(_Z_OS_POSIX)
 class mutex
 {
 public:
@@ -45,7 +42,7 @@ public:
 private:
     pthread_mutex_t m_mutex;
 };
-#endif // _Z_OS_POSIX
+#endif // defined(_Z_OS_WINDOWS)
 
 } // namespace zed
 
