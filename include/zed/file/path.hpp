@@ -15,6 +15,7 @@
 #include <string>
 #include "../build_macros.h"
 #ifdef _Z_OS_WINDOWS
+#   include <ShlObj.h>
 #   include "../win/hmodule.hpp"
 #endif
 
@@ -38,6 +39,9 @@ class sys_path
 {
 public:
     static path::string_t get_app_path(void);
+#ifdef _Z_OS_WINDOWS
+    static std::wstring get_known_folder_path(REFKNOWNFOLDERID rfid, DWORD flags = KF_FLAG_DEFAULT);
+#endif
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -54,6 +58,23 @@ inline path::string_t sys_path::get_app_path(void)
 {
     std::wstring app_file = hmodule::get_file_name(nullptr);
     return path::path_of_file(app_file);
+}
+
+inline std::wstring sys_path::get_known_folder_path(REFKNOWNFOLDERID rfid, DWORD flags)
+{
+    std::wstring ret;
+
+    PWSTR pp = nullptr;
+    HRESULT hr = ::SHGetKnownFolderPath(rfid, flags, nullptr, &pp);
+    if (SUCCEEDED(hr))
+    {
+        ret = pp;
+        if (ret.back() != L'\\')
+            ret.push_back(L'\\');
+        ::CoTaskMemFree(pp);
+    }
+
+    return ret;
 }
 #endif // _Z_OS_WINDOWS
 
