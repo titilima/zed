@@ -15,7 +15,7 @@
 #include <cstdio>
 #include "../build_macros.h"
 #ifdef _Z_OS_WINDOWS
-#include "../win/handled_resource.hpp"
+#   include "../win/handled_resource.hpp"
 #endif
 
 namespace zed {
