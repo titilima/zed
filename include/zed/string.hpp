@@ -13,23 +13,44 @@
 #define ZED_STRING_HPP
 
 #include <string>
+#include "./build_macros.h"
 #include "./cctype.hpp"
-#include "./string_view.hpp"
 #include "./type_traits.hpp"
+#ifdef _Z_STRING_VIEW_ENABLED
+#   include <string_view>
+#endif
 
 namespace zed {
-
 #ifdef _Z_STRING_VIEW_ENABLED
-/**
- * string <-> string_view
- */
-
 template <typename CharT>
-std::basic_string_view<CharT> stov(const std::basic_string<CharT> &s) { return std::basic_string_view<CharT>(s); }
-
+using string_piece = std::basic_string_view<CharT>;
+#else
 template <typename CharT>
-[[nodiscard]] std::basic_string<CharT> vtos(const std::basic_string_view<CharT> &s) { return std::basic_string<CharT>(s); }
-#endif
+class string_piece
+{
+public:
+    explicit string_piece(void) = default;
+    explicit string_piece(const CharT *ps, size_t length) : m_ps(ps), m_length(length) {}
+
+    const CharT* data(void) const { return m_ps; }
+    size_t length(void) const { return m_length; }
+    bool empty(void) const { return 0 == m_length; }
+private:
+    const CharT *m_ps = nullptr;
+    size_t m_length = 0;
+};
+#endif // _Z_STRING_VIEW_ENABLED
+} // namespace zed
+
+namespace std {
+template <typename CharT>
+[[nodiscard]] basic_string<CharT> to_string(const zed::string_piece<CharT> &s)
+{
+    return s.empty() ? basic_string<CharT>() : basic_string<CharT>(s.data(), s.length());
+}
+} // namespace std
+
+namespace zed {
 
 /**
  * Iterator Stuff
@@ -68,6 +89,32 @@ bool striequ(const S1 &s1, const S2 &s2) { return 0 == zed::stricmp(s1, s2); }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Implementations
+
+namespace detail {
+
+template <typename T>
+class string_adaptor
+{
+public:
+    using char_type = typename T::value_type;
+    constexpr static auto npos = T::npos;
+
+    explicit string_adaptor(const T &s) : m_s(s) {}
+
+    size_t find(const char_type *psz, size_t pos = 0) const { return m_s.find(psz, pos); }
+    size_t find_first_not_of(const char_type *psz, size_t pos = 0) const { return m_s.find_first_not_of(psz, pos); }
+    size_t find_last_not_of(const char_type *psz, size_t pos = npos) const { return m_s.find_last_not_of(psz, pos); }
+
+    string_piece<char_type> sub_piece(size_t pos, size_t count = npos) const
+    {
+        count = std::min(m_s.length() - pos, count);
+        return count > 0 ? string_piece<char_type>(m_s.data() + pos, count) : string_piece<char_type>();
+    }
+private:
+    const T &m_s;
+};
+
+} // namespace detail
 
 template <typename CharT>
 class char_iterator<const CharT *>
