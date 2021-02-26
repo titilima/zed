@@ -13,7 +13,10 @@
 #define ZED_TYPE_TRAITS_HPP
 
 #include <type_traits>
-#include "./string_view.hpp"
+#include "./build_macros.h"
+#ifdef _Z_STRING_VIEW_ENABLED
+#   include <string_view>
+#endif
 
 namespace zed {
 
