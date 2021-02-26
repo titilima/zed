@@ -12,10 +12,8 @@
 #ifndef ZED_STRING_ALGORITHM_HPP
 #define ZED_STRING_ALGORITHM_HPP
 
+#include <vector>
 #include "../string.hpp"
-#ifndef _Z_STRING_VIEW_ENABLED
-#   error TODO: Implementation for string_view?
-#endif
 
 namespace zed {
 
@@ -43,7 +41,7 @@ template <typename String, typename Chars = ascii_whitespace<typename String::va
 String trim_left(const String &s);
 
 template <typename CharT, typename Chars = ascii_whitespace<CharT>>
-std::basic_string_view<CharT> trim_left(const CharT *cs) { return trim_left<std::basic_string_view<CharT>, Chars>(std::basic_string_view<CharT>(cs)); }
+string_piece<CharT> trim_left(const CharT *psz);
 
 template <typename CharT, typename Chars = ascii_whitespace<CharT>>
 void trim_left(std::basic_string<CharT> *s);
@@ -52,7 +50,7 @@ template <typename String, typename Chars = ascii_whitespace<typename String::va
 String trim_right(const String &s);
 
 template <typename CharT, typename Chars = ascii_whitespace<CharT>>
-std::basic_string_view<CharT> trim_right(const CharT *cs) { return trim_right<std::basic_string_view<CharT>, Chars>(std::basic_string_view<CharT>(cs)); }
+string_piece<CharT> trim_right(const CharT *psz);
 
 template <typename CharT, typename Chars = ascii_whitespace<CharT>>
 void trim_right(std::basic_string<CharT> *s);
@@ -61,13 +59,42 @@ template <typename String, typename Chars = ascii_whitespace<typename String::va
 String trim(const String &s);
 
 template <typename CharT, typename Chars = ascii_whitespace<CharT>>
-std::basic_string_view<CharT> trim(const CharT *cs);
+string_piece<CharT> trim(const CharT *psz);
 
 template <typename CharT, typename Chars = ascii_whitespace<CharT>>
 void trim(std::basic_string<CharT> *s);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Implementations
+
+namespace detail {
+
+template <typename Adaptor, typename Chars>
+string_piece<typename Adaptor::char_type> trim_left(const Adaptor &s)
+{
+    size_t p = s.find_first_not_of(Chars::chars);
+    if (Adaptor::npos == p)
+        p = 0;
+    return s.sub_piece(p);
+}
+
+template <typename Adaptor, typename Chars>
+string_piece<typename Adaptor::char_type> trim_right(const Adaptor &s)
+{
+    size_t p = s.find_last_not_of(Chars::chars);
+    return Adaptor::npos != p ? s.sub_piece(0, p + 1) : string_piece<typename Adaptor::char_type>();
+}
+
+template <typename Adaptor, typename Chars = ascii_whitespace<typename Adaptor::char_type>>
+string_piece<typename Adaptor::char_type> trim(const Adaptor &s)
+{
+    string_piece<typename Adaptor::char_type> ret = trim_right<Adaptor, Chars>(s);
+    if (!ret.empty())
+        ret = trim_left<string_adaptor<string_piece<typename Adaptor::char_type>>, Chars>(string_adaptor(ret));
+    return ret;
+}
+
+} // namespace detail
 
 template <typename CharT>
 std::basic_string<CharT> replace(const std::basic_string_view<CharT> &src, const std::basic_string_view<CharT> &new_sub, const std::basic_string_view<CharT> &old_sub)
@@ -98,53 +125,67 @@ std::basic_string<typename chartype_trait<S1>::char_type> replace(const S1 &src,
 template <typename String, typename Chars>
 String trim_left(const String &s)
 {
-    size_t p = s.find_first_not_of(Chars::chars);
-    return String::npos != p ? s.substr(p) : s;
+    string_piece ret = detail::trim_left<detail::string_adaptor<String>, Chars>(detail::string_adaptor(s));
+    return String(ret.data(), ret.length());
+}
+
+template <typename CharT, typename Chars>
+string_piece<CharT> trim_left(const CharT *psz)
+{
+    return detail::trim_left<detail::string_adaptor<const CharT *>, Chars>(detail::string_adaptor(psz));
 }
 
 template <typename CharT, typename Chars>
 void trim_left(std::basic_string<CharT> *s)
 {
-    std::basic_string_view<CharT> v = stov(*s);
-    v = trim_left<std::basic_string_view<CharT>, Chars>(v);
-    if (v.data() != s->data())
+    string_piece ret = detail::trim_left<detail::string_adaptor<std::basic_string<CharT>>, Chars>(detail::string_adaptor(*s));
+    if (ret.data() != s->data())
     {
-        ::memmove(const_cast<CharT *>(s->data()), v.data(), v.length() * sizeof(CharT));
-        s->resize(v.length());
+        ::memmove(const_cast<CharT *>(s->data()), ret.data(), ret.length() * sizeof(CharT));
+        s->resize(ret.length());
     }
 }
 
 template <typename String, typename Chars>
 String trim_right(const String &s)
 {
-    size_t p = s.find_last_not_of(Chars::chars);
-    return String::npos != p ? s.substr(0, p + 1) : String();
+    string_piece ret = detail::trim_right<detail::string_adaptor<String>, Chars>(detail::string_adaptor(s));
+    return String(ret.data(), ret.length());
+}
+
+template <typename CharT, typename Chars>
+string_piece<CharT> trim_right(const CharT *psz)
+{
+    return detail::trim_right<detail::string_adaptor<const CharT *>, Chars>(detail::string_adaptor(psz));
 }
 
 template <typename CharT, typename Chars>
 void trim_right(std::basic_string<CharT> *s)
 {
-    std::basic_string_view<CharT> v = stov(*s);
-    v = trim_right<std::basic_string_view<CharT>, Chars>(v);
-    if (v.length() != s->length())
-        s->resize(v.length());
+    string_piece ret = detail::trim_right<detail::string_adaptor<std::basic_string<CharT>>, Chars>(detail::string_adaptor(*s));
+    if (ret.length() != s->length())
+        s->resize(ret.length());
 }
 
 template <typename String, typename Chars>
 String trim(const String &s)
 {
-    String r = trim_right<String, Chars>(s);
-    if (!r.empty())
-        r = trim_left<String, Chars>(r);
-    return r;
+    string_piece ret = detail::trim<detail::string_adaptor<String>, Chars>(detail::string_adaptor(*s));
+    return String(ret.data(), ret.length());
+}
+
+template <typename CharT, typename Chars>
+string_piece<CharT> trim(const CharT *psz)
+{
+    return detail::trim<detail::string_adaptor<const CharT *>, Chars>(detail::string_adaptor(psz));
 }
 
 template <typename CharT, typename Chars>
 void trim(std::basic_string<CharT> *s)
 {
-    trim_right<CharT, Chars>(s);
+    trim_right<detail::string_adaptor<std::basic_string<CharT>>, Chars>(s);
     if (!s->empty())
-        trim_left<CharT, Chars>(s);
+        trim_left<detail::string_adaptor<std::basic_string<CharT>>, Chars>(s);
 }
 
 } // namespace zed
