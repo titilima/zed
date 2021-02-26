@@ -28,6 +28,16 @@ template <typename S1, typename S2, typename S3, typename = std::enable_if<chart
 std::basic_string<typename chartype_trait<S1>::char_type> replace(const S1 &src, const S2 &new_sub, const S3 &old_sub);
 
 /**
+ * Split
+ */
+
+template <typename String>
+std::vector<string_piece<typename String::value_type>> split(const String &src, const typename String::value_type *separator);
+
+template <typename CharT>
+std::vector<string_piece<CharT>> split(const CharT *src, const CharT *separator);
+
+/**
  * Trimming Stuff
  */
 
@@ -68,6 +78,39 @@ void trim(std::basic_string<CharT> *s);
 // Implementations
 
 namespace detail {
+
+template <class Adaptor>
+std::vector<string_piece<typename Adaptor::char_type>> split(const Adaptor &s, const typename Adaptor::char_type *separator)
+{
+    using piece_type = string_piece<typename Adaptor::char_type>;
+
+    std::vector<piece_type> ret;
+
+    size_t b = 0;
+    size_t e = s.find(separator, b);
+    while (Adaptor::npos != e)
+    {
+        piece_type tmp = s.sub_piece(b, e - b);
+        if (!tmp.empty())
+        {
+            tmp = trim<string_adaptor<piece_type>>(string_adaptor<piece_type>(tmp));
+            if (!tmp.empty())
+                ret.push_back(tmp);
+        }
+
+        b = e + 1;
+        e = s.find(separator, b);
+    }
+
+    piece_type left = s.sub_piece(b);
+    if (!left.empty())
+    {
+        left = trim<string_adaptor<piece_type>>(string_adaptor<piece_type>(left));
+        if (!left.empty())
+            ret.push_back(left);
+    }
+    return ret;
+}
 
 template <typename Adaptor, typename Chars>
 string_piece<typename Adaptor::char_type> trim_left(const Adaptor &s)
@@ -120,6 +163,20 @@ std::basic_string<typename chartype_trait<S1>::char_type> replace(const S1 &src,
     using char_type = typename chartype_trait<S1>::char_type;
     using string_view_type = std::basic_string_view<char_type>;
     return replace<char_type>(string_view_type(src), string_view_type(new_sub), string_view_type(old_sub));
+}
+
+template <typename String>
+std::vector<string_piece<typename String::value_type>> split(const String &s, const typename String::value_type *separator)
+{
+    detail::string_adaptor<String> adaptor(s);
+    return detail::split(adaptor, separator);
+}
+
+template <typename CharT>
+std::vector<string_piece<CharT>> split(const CharT *ps, const CharT *separator)
+{
+    detail::string_adaptor<const CharT *> adaptor(ps);
+    return detail::split(adaptor, separator);
 }
 
 template <typename String, typename Chars>
