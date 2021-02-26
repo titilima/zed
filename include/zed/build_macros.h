@@ -34,4 +34,20 @@
 #   error OS is not detected!
 #endif
 
+/*
+ * _Z_STRING_VIEW_ENABLED
+ */
+
+#ifdef __cplusplus
+#   if defined(_MSC_VER)
+#       if _MSC_VER >= 1910 && _MSVC_LANG > 201402
+#           define _Z_STRING_VIEW_ENABLED
+#       endif
+#   elif defined(__has_include)
+#       if __has_include(<string_view>)
+#           define _Z_STRING_VIEW_ENABLED
+#       endif
+#   endif
+#endif
+
 #endif // ZED_BUILD_MACROS_H
