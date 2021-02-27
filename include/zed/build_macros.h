@@ -18,6 +18,9 @@
 
 #if defined(_WIN32)
 #   define _Z_OS_WINDOWS
+#   ifdef __cplusplus
+#       define NOMINMAX
+#   endif
 #elif defined(__APPLE__)
 #   define _Z_OS_APPLE
 #   include <TargetConditionals.h>
