@@ -31,6 +31,7 @@ class string_piece
 public:
     explicit string_piece(void) = default;
     explicit string_piece(const CharT *ps, size_t length) : m_ps(ps), m_length(length) {}
+    explicit string_piece(const std::basic_string<CharT> &s) : m_ps(s.data()), m_length(s.length()) {}
 
     const CharT* data(void) const { return m_ps; }
     size_t length(void) const { return m_length; }
