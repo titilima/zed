@@ -231,7 +231,7 @@ string_piece<CharT> trim_right(const CharT *psz)
 template <typename CharT, typename Chars>
 void trim_right(std::basic_string<CharT> *s)
 {
-    string_piece ret = detail::trim_right<detail::string_adaptor<std::basic_string<CharT>>, Chars>(detail::string_adaptor(*s));
+    string_piece<CharT> ret = detail::trim_right<detail::string_adaptor<std::basic_string<CharT>>, Chars>(detail::string_adaptor(*s));
     if (ret.length() != s->length())
         s->resize(ret.length());
 }
@@ -239,7 +239,7 @@ void trim_right(std::basic_string<CharT> *s)
 template <typename String, typename Chars>
 String trim(const String &s)
 {
-    string_piece ret = detail::trim<detail::string_adaptor<String>, Chars>(detail::string_adaptor(*s));
+    string_piece<typename String::value_type> ret = detail::trim<detail::string_adaptor<String>, Chars>(detail::string_adaptor(s));
     return String(ret.data(), ret.length());
 }
 
