@@ -79,6 +79,17 @@ void trim(std::basic_string<CharT> *s);
 
 namespace detail {
 
+template <typename CharT>
+size_t pszlen(const CharT *psz)
+{
+    size_t l = 0;
+    while ('\0' != *psz)
+    {
+        ++psz; ++l;
+    }
+    return l;
+}
+
 template <class Adaptor>
 std::vector<string_piece<typename Adaptor::char_type>> split(const Adaptor &s, const typename Adaptor::char_type *separator)
 {
@@ -88,6 +99,7 @@ std::vector<string_piece<typename Adaptor::char_type>> split(const Adaptor &s, c
 
     size_t b = 0;
     size_t e = s.find(separator, b);
+    size_t l = pszlen(separator);
     while (Adaptor::npos != e)
     {
         piece_type tmp = s.sub_piece(b, e - b);
@@ -98,7 +110,7 @@ std::vector<string_piece<typename Adaptor::char_type>> split(const Adaptor &s, c
                 ret.push_back(tmp);
         }
 
-        b = e + 1;
+        b = e + l;
         e = s.find(separator, b);
     }
 
