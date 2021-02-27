@@ -65,6 +65,9 @@ void args_collector::collect_from(const Arg &arg, const Args&... args)
     collect_from<Args...>(args...);
 }
 
+template <>
+inline void args_collector::push<std::string>(const std::string &arg) { emplace_back(arg); }
+
 template <typename CharT>
 template <typename S>
 formatter_impl<CharT>::formatter_impl(const S &format)
