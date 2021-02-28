@@ -160,6 +160,7 @@
     <ClInclude Include="..\..\include\zed\log.hpp" />
     <ClInclude Include="..\..\include\zed\memory.hpp" />
     <ClInclude Include="..\..\include\zed\mutex.hpp" />
+    <ClInclude Include="..\..\include\zed\net\http_codecs.hpp" />
     <ClInclude Include="..\..\include\zed\net\http_constants.hpp" />
     <ClInclude Include="..\..\include\zed\net\socket.hpp" />
     <ClInclude Include="..\..\include\zed\platform_sdk.h" />

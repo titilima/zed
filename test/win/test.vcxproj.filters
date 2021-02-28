@@ -89,5 +89,8 @@
     <ClInclude Include="..\..\include\zed\log.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\zed\net\http_codecs.hpp">
+      <Filter>Header Files\net</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

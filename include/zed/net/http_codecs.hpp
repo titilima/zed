@@ -13,42 +13,51 @@
 #define ZED_NET_HTTP_CODECS_HPP
 
 #include <string>
-#include "../string_view.hpp"
+#include "../string.hpp"
 
 namespace zed {
 
-std::string decode_uri_component(const std::string_view &s);
+std::string decode_uri_component(const char *psz);
+std::string decode_uri_component(const string_piece<char> &s);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Implementations
 
-inline std::string decode_uri_component(const std::string_view &s)
+namespace detail {
+
+template <class CharIterator>
+std::string decode_uri_component(CharIterator &it)
 {
     std::string ret;
-
-    const char *p = s.data();
-    size_t left = s.length();
-    while (left > 0)
+    while (!it.reach_the_end())
     {
-        char ch = *p;
+        char ch = *it;
         if ('%' == ch)
         {
-            if (left < 3)
+            ++it;
+            if (it.reach_the_end())
             {
                 ret.push_back('?');
                 break;
             }
 
+            std::string hex(1, *it);
+            ++it;
+            if (it.reach_the_end())
+            {
+                ret.push_back('?');
+                break;
+            }
+
+            hex.push_back(*it);
             try
             {
-                std::string hex(p + 1, 2);
                 ch = std::stoi(hex, nullptr, 16);
             }
             catch (...)
             {
                 ch = '?';
             }
-            p += 2; left -= 2;
         }
         else if ('+' == ch)
         {
@@ -56,9 +65,23 @@ inline std::string decode_uri_component(const std::string_view &s)
         }
 
         ret.push_back(ch);
-        ++p; --left;
+        ++it;
     }
     return ret;
+}
+
+} // namespace detail
+
+inline std::string decode_uri_component(const char *psz)
+{
+    detail::char_iterator it(psz);
+    return detail::decode_uri_component(it);
+}
+
+inline std::string decode_uri_component(const string_piece<char> &s)
+{
+    detail::char_iterator it(s);
+    return detail::decode_uri_component(it);
 }
 
 } // namespace zed
