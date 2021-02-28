@@ -72,7 +72,7 @@ template <typename CharT>
 template <typename S>
 formatter_impl<CharT>::formatter_impl(const S &format)
 {
-    char_iterator it(format);
+    detail::char_iterator it(format);
 
     part p;
     typename part::type next_type = part::placeholder;

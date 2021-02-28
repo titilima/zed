@@ -12,8 +12,10 @@
 #ifndef ZED_STRING_HPP
 #define ZED_STRING_HPP
 
-#include <string>
 #include "./build_macros.h"
+
+#include <string>
+#include "./assert.h"
 #include "./cctype.hpp"
 #include "./type_traits.hpp"
 #ifdef _Z_STRING_VIEW_ENABLED
@@ -52,25 +54,6 @@ template <typename CharT>
 } // namespace std
 
 namespace zed {
-
-/**
- * Iterator Stuff
- */
-
-template <class String>
-class char_iterator
-{
-public:
-    explicit char_iterator(const String &s) : m_it(s.begin()), m_end(s.end()) {}
-
-    typename String::value_type operator*() const { return *m_it; }
-    char_iterator& operator++() { ++m_it; return *this; }
-
-    bool reach_the_end(void) const { return m_it == m_end; }
-private:
-    typename String::const_iterator m_it;
-    const typename String::const_iterator m_end;
-};
 
 /**
  * Comparisons
@@ -115,41 +98,77 @@ private:
     const T &m_s;
 };
 
-} // namespace detail
+template <class String>
+class char_iterator
+{
+public:
+    using char_type = typename String::value_type;
+
+    explicit char_iterator(const String &s) : m_ps(s.data()), m_left(s.length()) {}
+
+    typename char_type operator*() const { return *m_ps; }
+    char_iterator& operator++()
+    {
+        ZASSERT(!reach_the_end());
+        ++m_ps; --m_left;
+        return *this;
+    }
+
+    bool reach_the_end(void) const { return 0 == m_left; }
+private:
+    const char_type *m_ps;
+    size_t m_left;
+};
 
 template <typename CharT>
 class char_iterator<const CharT *>
 {
 public:
-    explicit char_iterator(const CharT *psz) : m_p(psz) {}
+    using char_type = CharT;
 
-    CharT operator*() const { return *m_p; }
-    char_iterator& operator++() { ++m_p; return *this; }
+    explicit char_iterator(const CharT *psz) : m_psz(psz) {}
 
-    bool reach_the_end(void) const { return *m_p == '\0'; }
+    char_type operator*() const { return *m_psz; }
+    char_iterator& operator++()
+    {
+        ZASSERT(!reach_the_end());
+        ++m_psz;
+        return *this;
+    }
+
+    bool reach_the_end(void) const { return *m_psz == '\0'; }
 private:
-    const CharT *m_p;
+    const char_type *m_psz;
 };
 
 template <typename CharT, size_t N>
 class char_iterator<CharT[N]>
 {
 public:
-    explicit char_iterator(const CharT psz[]) : m_p(psz) {}
+    using char_type = CharT;
 
-    CharT operator*() const { return *m_p; }
-    char_iterator& operator++() { ++m_p; return *this; }
+    explicit char_iterator(const CharT psz[]) : m_psz(psz) {}
 
-    bool reach_the_end(void) const { return *m_p == '\0'; }
+    char_type operator*() const { return *m_psz; }
+    char_iterator& operator++()
+    {
+        ZASSERT(!reach_the_end());
+        ++m_psz;
+        return *this;
+    }
+
+    bool reach_the_end(void) const { return *m_psz == '\0'; }
 private:
-    const CharT *m_p;
+    const char_type *m_psz;
 };
+
+} // namespace detail
 
 template <typename S1, typename S2, typename>
 int strcmp(const S1 &s1, const S2 &s2)
 {
-    char_iterator it1(s1);
-    char_iterator it2(s2);
+    detail::char_iterator it1(s1);
+    detail::char_iterator it2(s2);
     while (!it1.reach_the_end() && !it2.reach_the_end())
     {
         auto c1 = *it1;
@@ -174,8 +193,8 @@ int strcmp(const S1 &s1, const S2 &s2)
 template <typename S1, typename S2, typename>
 int stricmp(const S1 &s1, const S2 &s2)
 {
-    char_iterator it1(s1);
-    char_iterator it2(s2);
+    detail::char_iterator it1(s1);
+    detail::char_iterator it2(s2);
     while (!it1.reach_the_end() && !it2.reach_the_end())
     {
         auto c1 = *it1;
