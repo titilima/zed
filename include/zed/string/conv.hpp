@@ -66,7 +66,9 @@ inline std::wstring multi_byte_to_wide_string(const string_piece<char> &s, UINT 
 
 inline std::wstring multi_byte_to_wide_string(PCSTR psz, UINT cp)
 {
-    return detail::multi_byte_to_wide_string(psz, -1, cp);
+    std::wstring ret = detail::multi_byte_to_wide_string(psz, -1, cp);
+    ret.pop_back(); // for the last '\0'
+    return ret;
 }
 
 inline std::string wide_string_to_multi_byte(const string_piece<wchar_t> &s, UINT cp)
@@ -76,7 +78,9 @@ inline std::string wide_string_to_multi_byte(const string_piece<wchar_t> &s, UIN
 
 inline std::string wide_string_to_multi_byte(PCWSTR psz, UINT cp)
 {
-    return detail::wide_string_to_multi_byte(psz, -1, cp);
+    std::string ret = detail::wide_string_to_multi_byte(psz, -1, cp);
+    ret.pop_back(); // for the last '\0'
+    return ret;
 }
 #endif // _Z_OS_WINDOWS
 
