@@ -13,6 +13,8 @@
 #define ZED_MUTEX_HPP
 
 #include "./platform_sdk.h"
+
+#include <mutex> // for std::unique_lock
 #if defined(_Z_OS_WINDOWS)
 #   include "./win/handled_resource.hpp"
 #elif defined(_Z_OS_POSIX)
