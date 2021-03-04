@@ -2,17 +2,27 @@
 // -------------------------------------------------
 // ZED Kit
 // -------------------------------------------------
-//   File Name: cctype.hpp
+//   File Name: ctype.hpp
 //      Author: Ziming Li
 //     Created: 2021-02-09
 // -------------------------------------------------
 // Copyright (C) 2021 MingYang Software Technology.
 // -------------------------------------------------
 
-#ifndef ZED_CCTYPE_HPP
-#define ZED_CCTYPE_HPP
+#ifndef ZED_CTYPE_HPP
+#define ZED_CTYPE_HPP
+
+#include <cstring>
 
 namespace zed {
+
+template <typename CharT>
+struct ascii_whitespace
+{
+    static constexpr CharT chars[] = { ' ', '\t', '\n', '\v', '\f', '\r', '\0' };
+};
+
+inline bool isspace(int ch) { return nullptr != ::strchr(ascii_whitespace<char>::chars, ch); }
 
 /**
  * NOTE:
@@ -29,4 +39,4 @@ inline bool isalpha(int ch) { return islower(ch) || isupper(ch); }
 
 } // namespace zed
 
-#endif // ZED_CCTYPE_HPP
+#endif // ZED_CTYPE_HPP
