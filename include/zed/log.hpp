@@ -62,6 +62,15 @@ void log(const char *fmt, const Args&... args)
 #endif
 }
 
+inline void log(const char *s)
+{
+#ifdef _Z_OS_WINDOWS
+    std::wstring ws = multi_byte_to_wide_string(s);
+    ws.append(L"\r\n");
+    ::OutputDebugStringW(ws.c_str());
+#endif
+}
+
 } // namespace zed
 
 #ifdef NDEBUG
