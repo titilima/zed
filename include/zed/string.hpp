@@ -16,7 +16,7 @@
 
 #include <string>
 #include "./assert.h"
-#include "./cctype.hpp"
+#include "./ctype.hpp"
 #include "./type_traits.hpp"
 #ifdef _Z_STRING_VIEW_ENABLED
 #   include <string_view>
@@ -86,8 +86,8 @@ public:
     explicit string_adaptor(const T &s) : m_s(s) {}
 
     size_t find(const char_type *psz, size_t pos = 0) const { return m_s.find(psz, pos); }
-    size_t find_first_not_of(const char_type *psz, size_t pos = 0) const { return m_s.find_first_not_of(psz, pos); }
-    size_t find_last_not_of(const char_type *psz, size_t pos = npos) const { return m_s.find_last_not_of(psz, pos); }
+    size_t find_first_not_of(const char_type *psz) const { return m_s.find_first_not_of(psz); }
+    size_t find_last_not_of(const char_type *psz) const { return m_s.find_last_not_of(psz); }
 
     string_piece<char_type> sub_piece(size_t pos, size_t count = npos) const
     {
@@ -96,6 +96,61 @@ public:
     }
 private:
     const T &m_s;
+};
+
+template <typename CharT>
+class string_adaptor<const CharT *>
+{
+public:
+    using char_type = CharT;
+    constexpr static auto npos = std::basic_string<CharT>::npos;
+
+    explicit string_adaptor(const CharT *psz) : m_psz(psz) {}
+
+    size_t find_first_not_of(const char_type *psz) const
+    {
+        for (const CharT *p = m_psz; '\0' != *p; ++p)
+        {
+            if (!in_chars(psz, *p))
+                return p - m_psz;
+        }
+        return npos;
+    }
+    size_t find_last_not_of(const char_type *psz) const
+    {
+        size_t i = 0, ret = 0;
+        for (const CharT *p = m_psz; '\0' != *p; ++p)
+        {
+            if (!in_chars(psz, *p))
+                ret = i;
+            ++i;
+        }
+        return ret;
+    }
+
+    string_piece<char_type> sub_piece(size_t pos, size_t count = npos) const
+    {
+        if (npos == count)
+        {
+            count = 0;
+            for (const CharT *p = m_psz + pos; '\0' != *p; ++p)
+                ++count;
+        }
+        return string_piece<char_type>(m_psz + pos, count);
+    }
+private:
+    static bool in_chars(const CharT *chars, int ch)
+    {
+        while ('\0' != *chars)
+        {
+            if (*chars == ch)
+                return true;
+            ++chars;
+        }
+        return false;
+    }
+
+    const CharT *m_psz;
 };
 
 template <class String>
