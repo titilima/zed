@@ -25,6 +25,9 @@
     <Filter Include="Header Files\win">
       <UniqueIdentifier>{c0a32536-9f03-46f0-b4c3-366bd9672359}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\parsers">
+      <UniqueIdentifier>{c294b2df-2013-4fe5-8761-75f89ab51ecd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main.cpp">
@@ -36,9 +39,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\zed\build_macros.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\zed\cctype.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\zed\memory.hpp">
@@ -91,6 +91,15 @@
     </ClInclude>
     <ClInclude Include="..\..\include\zed\net\http_codecs.hpp">
       <Filter>Header Files\net</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\zed\ctype.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\zed\string\parser.hpp">
+      <Filter>Header Files\string</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\zed\parsers\ini.hpp">
+      <Filter>Header Files\parsers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
