@@ -21,6 +21,8 @@ namespace zed {
 class ini_data
 {
 public:
+    template <class String>
+    static ini_data parse_string(const String &s);
     static ini_data parse_cstr(const char *psz);
     static ini_data parse_stream(parser_stream &stream);
 
@@ -216,6 +218,13 @@ const std::string* ini_data::get_value(const char *sec, const char *name) const
             return &(it->second);
     }
     return nullptr;
+}
+
+template <class String>
+ini_data ini_data::parse_string(const String &s)
+{
+    parser_string_stream stream(s);
+    return parse_stream(stream);
 }
 
 inline ini_data ini_data::parse_cstr(const char *psz)
