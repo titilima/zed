@@ -27,6 +27,14 @@ TEST(StringComparisons, ComparesCorrectly)
     ASSERT_NE(zed::stricmp("_", "A"), zed::stricmp("_", "a"));
 }
 
+TEST(StringTrimming, TrimsCorrectly)
+{
+    const char s[] = " \t Hello!\t \t";
+    ASSERT_TRUE(zed::strequ(zed::trim_left(s), "Hello!\t \t"));
+    ASSERT_TRUE(zed::strequ(zed::trim_right(s), " \t Hello!"));
+    ASSERT_TRUE(zed::strequ(zed::trim(s), "Hello!"));
+}
+
 TEST(Formatters, FormatsCorrectly)
 {
     ASSERT_EQ(std::string("Hello, 123!").compare(zed::log_formatter("{}, {}!", "Hello", 123)), 0);
