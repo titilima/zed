@@ -13,6 +13,7 @@
 #define ZED_STRING_ALGORITHM_HPP
 
 #include <vector>
+#include "../ctype.hpp"
 #include "../string.hpp"
 
 namespace zed {
@@ -41,38 +42,32 @@ std::vector<string_piece<CharT>> split(const CharT *src, const CharT *separator)
  * Trimming Stuff
  */
 
+template <typename String>
+String trim_left(const String &s, const typename String::value_type *chars_to_trim = ascii_whitespace<typename String::value_type>::chars);
+
 template <typename CharT>
-struct ascii_whitespace
-{
-    static constexpr CharT chars[] = { ' ', '\t', '\n', '\v', '\f', '\r', '\0' };
-};
+string_piece<CharT> trim_left(const CharT *psz, const CharT *chars_to_trim = ascii_whitespace<CharT>::chars);
 
-template <typename String, typename Chars = ascii_whitespace<typename String::value_type>>
-String trim_left(const String &s);
+template <typename CharT>
+void trim_left(std::basic_string<CharT> *s, const CharT *chars_to_trim = ascii_whitespace<CharT>::chars);
 
-template <typename CharT, typename Chars = ascii_whitespace<CharT>>
-string_piece<CharT> trim_left(const CharT *psz);
+template <typename String>
+String trim_right(const String &s, const typename String::value_type *chars_to_trim = ascii_whitespace<typename String::value_type>::chars);
 
-template <typename CharT, typename Chars = ascii_whitespace<CharT>>
-void trim_left(std::basic_string<CharT> *s);
+template <typename CharT>
+string_piece<CharT> trim_right(const CharT *psz, const CharT *chars_to_trim = ascii_whitespace<CharT>::chars);
 
-template <typename String, typename Chars = ascii_whitespace<typename String::value_type>>
-String trim_right(const String &s);
+template <typename CharT>
+void trim_right(std::basic_string<CharT> *s, const CharT *chars_to_trim = ascii_whitespace<CharT>::chars);
 
-template <typename CharT, typename Chars = ascii_whitespace<CharT>>
-string_piece<CharT> trim_right(const CharT *psz);
+template <typename String>
+String trim(const String &s, const typename String::value_type *chars_to_trim = ascii_whitespace<typename String::value_type>::chars);
 
-template <typename CharT, typename Chars = ascii_whitespace<CharT>>
-void trim_right(std::basic_string<CharT> *s);
+template <typename CharT>
+string_piece<CharT> trim(const CharT *psz, const CharT *chars_to_trim = ascii_whitespace<CharT>::chars);
 
-template <typename String, typename Chars = ascii_whitespace<typename String::value_type>>
-String trim(const String &s);
-
-template <typename CharT, typename Chars = ascii_whitespace<CharT>>
-string_piece<CharT> trim(const CharT *psz);
-
-template <typename CharT, typename Chars = ascii_whitespace<CharT>>
-void trim(std::basic_string<CharT> *s);
+template <typename CharT>
+void trim(std::basic_string<CharT> *s, const CharT *chars_to_trim = ascii_whitespace<CharT>::chars);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Implementations
@@ -124,28 +119,28 @@ std::vector<string_piece<typename Adaptor::char_type>> split(const Adaptor &s, c
     return ret;
 }
 
-template <typename Adaptor, typename Chars>
-string_piece<typename Adaptor::char_type> trim_left(const Adaptor &s)
+template <typename Adaptor>
+string_piece<typename Adaptor::char_type> trim_left(const Adaptor &s, const typename Adaptor::char_type *chars_to_trim)
 {
-    size_t p = s.find_first_not_of(Chars::chars);
+    size_t p = s.find_first_not_of(chars_to_trim);
     if (Adaptor::npos == p)
         p = 0;
     return s.sub_piece(p);
 }
 
-template <typename Adaptor, typename Chars>
-string_piece<typename Adaptor::char_type> trim_right(const Adaptor &s)
+template <typename Adaptor>
+string_piece<typename Adaptor::char_type> trim_right(const Adaptor &s, const typename Adaptor::char_type *chars_to_trim)
 {
-    size_t p = s.find_last_not_of(Chars::chars);
+    size_t p = s.find_last_not_of(chars_to_trim);
     return Adaptor::npos != p ? s.sub_piece(0, p + 1) : string_piece<typename Adaptor::char_type>();
 }
 
-template <typename Adaptor, typename Chars = ascii_whitespace<typename Adaptor::char_type>>
-string_piece<typename Adaptor::char_type> trim(const Adaptor &s)
+template <typename Adaptor>
+string_piece<typename Adaptor::char_type> trim(const Adaptor &s, const typename Adaptor::char_type *chars_to_trim)
 {
-    string_piece<typename Adaptor::char_type> ret = trim_right<Adaptor, Chars>(s);
+    string_piece<typename Adaptor::char_type> ret = trim_right<Adaptor>(s, chars_to_trim);
     if (!ret.empty())
-        ret = trim_left<string_adaptor<string_piece<typename Adaptor::char_type>>, Chars>(string_adaptor(ret));
+        ret = trim_left<string_adaptor<string_piece<typename Adaptor::char_type>>>(string_adaptor(ret), chars_to_trim);
     return ret;
 }
 
@@ -191,23 +186,23 @@ std::vector<string_piece<CharT>> split(const CharT *ps, const CharT *separator)
     return detail::split(adaptor, separator);
 }
 
-template <typename String, typename Chars>
-String trim_left(const String &s)
+template <typename String>
+String trim_left(const String &s, const typename String::value_type *chars_to_trim)
 {
-    string_piece ret = detail::trim_left<detail::string_adaptor<String>, Chars>(detail::string_adaptor(s));
+    auto ret = detail::trim_left(detail::string_adaptor(s), chars_to_trim);
     return String(ret.data(), ret.length());
 }
 
-template <typename CharT, typename Chars>
-string_piece<CharT> trim_left(const CharT *psz)
+template <typename CharT>
+string_piece<CharT> trim_left(const CharT *psz, const CharT *chars_to_trim)
 {
-    return detail::trim_left<detail::string_adaptor<const CharT *>, Chars>(detail::string_adaptor(psz));
+    return detail::trim_left(detail::string_adaptor<const CharT *>(psz), chars_to_trim);
 }
 
-template <typename CharT, typename Chars>
-void trim_left(std::basic_string<CharT> *s)
+template <typename CharT>
+void trim_left(std::basic_string<CharT> *s, const CharT *chars_to_trim)
 {
-    string_piece ret = detail::trim_left<detail::string_adaptor<std::basic_string<CharT>>, Chars>(detail::string_adaptor(*s));
+    string_piece<CharT> ret = trim_left(string_piece<CharT>(*s), chars_to_trim);
     if (ret.data() != s->data())
     {
         ::memmove(const_cast<CharT *>(s->data()), ret.data(), ret.length() * sizeof(CharT));
@@ -215,46 +210,47 @@ void trim_left(std::basic_string<CharT> *s)
     }
 }
 
-template <typename String, typename Chars>
-String trim_right(const String &s)
+template <typename String>
+String trim_right(const String &s, const typename String::value_type *chars_to_trim)
 {
-    string_piece ret = detail::trim_right<detail::string_adaptor<String>, Chars>(detail::string_adaptor(s));
+    detail::string_adaptor<String> adaptor(s);
+    auto ret = detail::trim_right(adaptor, chars_to_trim);
     return String(ret.data(), ret.length());
 }
 
-template <typename CharT, typename Chars>
-string_piece<CharT> trim_right(const CharT *psz)
+template <typename CharT>
+string_piece<CharT> trim_right(const CharT *psz, const CharT *chars_to_trim)
 {
-    return detail::trim_right<detail::string_adaptor<const CharT *>, Chars>(detail::string_adaptor(psz));
+    return detail::trim_right(detail::string_adaptor(psz), chars_to_trim);
 }
 
-template <typename CharT, typename Chars>
-void trim_right(std::basic_string<CharT> *s)
+template <typename CharT>
+void trim_right(std::basic_string<CharT> *s, const CharT *chars_to_trim)
 {
-    string_piece<CharT> ret = detail::trim_right<detail::string_adaptor<std::basic_string<CharT>>, Chars>(detail::string_adaptor(*s));
+    auto ret = detail::trim_right(detail::string_adaptor(*s), chars_to_trim);
     if (ret.length() != s->length())
         s->resize(ret.length());
 }
 
-template <typename String, typename Chars>
-String trim(const String &s)
+template <typename String>
+String trim(const String &s, const typename String::value_type *chars_to_trim)
 {
-    string_piece<typename String::value_type> ret = detail::trim<detail::string_adaptor<String>, Chars>(detail::string_adaptor(s));
+    auto ret = detail::trim(detail::string_adaptor(s), chars_to_trim);
     return String(ret.data(), ret.length());
 }
 
-template <typename CharT, typename Chars>
-string_piece<CharT> trim(const CharT *psz)
+template <typename CharT>
+string_piece<CharT> trim(const CharT *psz, const CharT *chars_to_trim)
 {
-    return detail::trim<detail::string_adaptor<const CharT *>, Chars>(detail::string_adaptor(psz));
+    return detail::trim(detail::string_adaptor(psz), chars_to_trim);
 }
 
-template <typename CharT, typename Chars>
-void trim(std::basic_string<CharT> *s)
+template <typename CharT>
+void trim(std::basic_string<CharT> *s, const CharT *chars_to_trim)
 {
-    trim_right<detail::string_adaptor<std::basic_string<CharT>>, Chars>(s);
+    trim_right(s, chars_to_trim);
     if (!s->empty())
-        trim_left<detail::string_adaptor<std::basic_string<CharT>>, Chars>(s);
+        trim_left(s, chars_to_trim);
 }
 
 } // namespace zed
