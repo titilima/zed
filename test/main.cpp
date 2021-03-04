@@ -10,7 +10,7 @@
 
 #include <gtest/gtest.h>
 #include "zed/net/http_codecs.hpp"
-#include "zed/string/algorithm.hpp"
+#include "zed/parsers/ini.hpp"
 #include "zed/log.hpp"
 
 TEST(HTTPDecoders, DecodesCorrectly)
@@ -33,6 +33,27 @@ TEST(StringTrimming, TrimsCorrectly)
     ASSERT_TRUE(zed::strequ(zed::trim_left(s), "Hello!\t \t"));
     ASSERT_TRUE(zed::strequ(zed::trim_right(s), " \t Hello!"));
     ASSERT_TRUE(zed::strequ(zed::trim(s), "Hello!"));
+}
+
+TEST(INIParsing, ParsesCorrectly)
+{
+    const char data[] = 
+        "; last modified 1 April 2001 by John Doe\n"
+        "[owner]\n"
+        "name=John Doe\n"
+        "organization=Acme Products\n"
+        "\n"
+        "[database]\n"
+        "server=192.0.2.42 ; use IP address in case network name resolution is not working\n"
+        "port=143\n"
+        "file='acme payroll.dat'"
+        ;
+
+    zed::ini_data ini = zed::ini_data::parse_cstr(data);
+    ASSERT_EQ(ini.get_string("owner", "name"), "John Doe");
+    ASSERT_EQ(ini.get_string("database", "server"), "192.0.2.42");
+    ASSERT_EQ(ini.get_int("database", "port", 0), 143);
+    ASSERT_EQ(ini.get_string("database", "file"), "acme payroll.dat");
 }
 
 TEST(Formatters, FormatsCorrectly)
