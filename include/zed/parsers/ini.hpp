@@ -196,20 +196,20 @@ inline int ini_data::get_int(const char *sec, const char *name, int def) const
     return ret;
 }
 
-const ini_data::section* ini_data::get_section(const char *sec) const
+inline const ini_data::section* ini_data::get_section(const char *sec) const
 {
     auto it = m_sections.find(sec);
     return m_sections.end() != it ? &(it->second) : nullptr;
 }
 
-std::string ini_data::get_string(const char *sec, const char *name, const char *def) const
+inline std::string ini_data::get_string(const char *sec, const char *name, const char *def) const
 {
     if (const std::string *v = get_value(sec, name))
         return *v;
     return std::string(def);
 }
 
-const std::string* ini_data::get_value(const char *sec, const char *name) const
+inline const std::string* ini_data::get_value(const char *sec, const char *name) const
 {
     if (const section *s = get_section(sec))
     {
