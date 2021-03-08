@@ -13,7 +13,8 @@
 #define ZED_WIN_HMODULE_HPP
 
 #include <string>
-#include <Windows.h>
+#include <tuple>
+#include "../platform_sdk.h"
 
 namespace zed {
 
@@ -21,6 +22,9 @@ class hmodule
 {
 public:
     static std::wstring get_file_name(HMODULE h);
+
+    using resource_data = std::tuple<PVOID, DWORD>;
+    static bool get_resource_data(resource_data &dst, HMODULE h, PCTSTR type, int id);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -53,6 +57,24 @@ inline std::wstring hmodule::get_file_name(HMODULE h)
         ret.resize(size);
     }
     return ret;
+}
+
+inline bool hmodule::get_resource_data(resource_data &dst, HMODULE h, PCTSTR type, int id)
+{
+    HRSRC res = ::FindResource(h, MAKEINTRESOURCE(id), type);
+    if (nullptr == res)
+        return false;
+
+    HGLOBAL mem = ::LoadResource(h, res);
+    if (nullptr == mem)
+        return false;
+
+    PVOID data = ::LockResource(mem);
+    if (nullptr == data)
+        return false;
+
+    dst = std::make_tuple(data, ::SizeofResource(h, res));
+    return true;
 }
 
 } // namespace zed
