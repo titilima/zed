@@ -46,6 +46,8 @@ private:
 };
 #endif // defined(_Z_OS_WINDOWS)
 
+using mutex_guard = std::unique_lock<zed::mutex>;
+
 } // namespace zed
 
 #endif // ZED_MUTEX_HPP
