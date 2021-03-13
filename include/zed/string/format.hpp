@@ -19,6 +19,9 @@
 
 namespace zed {
 
+template <typename... Args>
+std::string sequence_format(const char *fmt, const Args&... args);
+
 class args_collector final : std::vector<std::string>
 {
 public:
@@ -41,7 +44,7 @@ private:
 template <typename CharT>
 class formatter_impl
 {
-protected:
+public:
     template <typename S>
     formatter_impl(const S &format);
 
@@ -118,6 +121,23 @@ std::basic_string<CharT> formatter_impl<CharT>::format(const part_formatter &for
             ret.append(formatter(p.m_content));
     }
     return ret;
+}
+
+template <typename... Args>
+std::string sequence_format(const char *fmt, const Args&... args)
+{
+    args_collector ac(args...);
+
+    size_t idx = 0;
+    const auto callback = [&ac, &idx](const std::string &)
+    {
+        std::string ret;
+        if (idx < ac.size())
+            ret = ac.at(idx);
+        ++idx;
+        return ret;
+    };
+    return formatter_impl<char>(fmt).format(callback);
 }
 
 } // namespace zed

@@ -26,37 +26,12 @@ void log(const char *fmt, const Args&... args);
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Implementations
 
-class log_formatter : formatter_impl<char>
-{
-public:
-    template <typename... Args>
-    log_formatter(const char *fmt, const Args&... args) : formatter_impl(fmt)
-    {
-        args_collector ac(args...);
-
-        size_t idx = 0;
-        const auto callback = [&ac, &idx](const std::string &)
-        {
-            std::string ret;
-            if (idx < ac.size())
-                ret = ac.at(idx);
-            ++idx;
-            return ret;
-        };
-        m_log = formatter_impl::format(callback);
-    }
-
-    operator const std::string& () const { return m_log; }
-private:
-    std::string m_log;
-};
-
 template <typename... Args>
 void log(const char *fmt, const Args&... args)
 {
-    log_formatter lf(fmt, args...);
+    std::string s = sequence_format(fmt, args...);
 #ifdef _Z_OS_WINDOWS
-    std::wstring ws = multi_byte_to_wide_string(lf);
+    std::wstring ws = multi_byte_to_wide_string(s);
     ws.append(L"\r\n");
     ::OutputDebugStringW(ws.c_str());
 #endif
