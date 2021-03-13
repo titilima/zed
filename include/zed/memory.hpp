@@ -54,6 +54,7 @@ public:
 
     T get(void) const { return m_resource.first; }
     T release(void) { return std::exchange(m_resource.first, Traits::invalid_value); }
+    void swap(unique_resource &r) { std::swap(m_resource.first, r.m_resource.first); }
 
     void reset(T resource = Traits::invalid_value)
     {
