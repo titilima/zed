@@ -71,6 +71,8 @@ class sqlite_rstream
 {
 public:
     operator bool() const { return SQLITE_ROW == m_ret; }
+
+    int next(void);
 private:
     friend class sqlite_qstream;
     friend const sqlite_rstream& operator>>(const sqlite_rstream &rs, int &n);
@@ -270,6 +272,12 @@ inline sqlite_rstream::sqlite_rstream(sqlite_stmt &stmt) : m_stmt(std::move(stmt
 inline int sqlite_rstream::index(void) const
 {
     return m_index++;
+}
+
+inline int sqlite_rstream::next(void)
+{
+    m_index = 0;
+    return m_ret = m_stmt.step();
 }
 
 inline const sqlite_rstream& operator>>(const sqlite_rstream &rs, int &n)
