@@ -13,7 +13,7 @@
 #define ZED_FILE_PATH_HPP
 
 #include <string>
-#include "../build_macros.h"
+#include "../platform_sdk.h"
 #ifdef _Z_OS_WINDOWS
 #   include <ShlObj.h>
 #   include "../win/hmodule.hpp"
@@ -26,12 +26,15 @@ class path
 public:
 #ifdef _Z_OS_WINDOWS
     using string_t = std::wstring;
+    using psz_t    = PCWSTR;
     static constexpr WCHAR splitter = L'\\';
 #else
     using string_t = std::string;
+    using psz_t    = const char *;
     static constexpr char splitter = '/';
 #endif
 
+    static bool create_directory(psz_t path_name);
     static string_t path_of_file(const string_t &file_name);
 };
 
@@ -54,6 +57,11 @@ inline path::string_t path::path_of_file(const string_t &file_name)
 }
 
 #ifdef _Z_OS_WINDOWS
+inline bool path::create_directory(psz_t path_name)
+{
+    return ::CreateDirectoryW(path_name, nullptr);
+}
+
 inline path::string_t sys_path::get_app_path(void)
 {
     std::wstring app_file = hmodule::get_file_name(nullptr);
