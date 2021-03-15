@@ -85,12 +85,16 @@ size_t pszlen(const CharT *psz)
     return l;
 }
 
+template <typename Adaptor>
+string_piece<typename Adaptor::char_type> trim(const Adaptor &s, const typename Adaptor::char_type *chars_to_trim);
+
 template <class Adaptor>
 std::vector<string_piece<typename Adaptor::char_type>> split(const Adaptor &s, const typename Adaptor::char_type *separator)
 {
     using piece_type = string_piece<typename Adaptor::char_type>;
 
     std::vector<piece_type> ret;
+    auto trim_chars = ascii_whitespace<typename Adaptor::char_type>::chars;
 
     size_t b = 0;
     size_t e = s.find(separator, b);
@@ -100,7 +104,7 @@ std::vector<string_piece<typename Adaptor::char_type>> split(const Adaptor &s, c
         piece_type tmp = s.sub_piece(b, e - b);
         if (!tmp.empty())
         {
-            tmp = trim<string_adaptor<piece_type>>(string_adaptor<piece_type>(tmp));
+            tmp = trim(string_adaptor<piece_type>(tmp), trim_chars);
             if (!tmp.empty())
                 ret.push_back(tmp);
         }
@@ -112,7 +116,7 @@ std::vector<string_piece<typename Adaptor::char_type>> split(const Adaptor &s, c
     piece_type left = s.sub_piece(b);
     if (!left.empty())
     {
-        left = trim<string_adaptor<piece_type>>(string_adaptor<piece_type>(left));
+        left = trim(string_adaptor<piece_type>(left), trim_chars);
         if (!left.empty())
             ret.push_back(left);
     }
