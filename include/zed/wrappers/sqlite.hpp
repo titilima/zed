@@ -16,6 +16,9 @@
 #include "../assert.h"
 #include "../file/file.hpp"
 #include "../memory.hpp"
+#ifdef _Z_OS_WINDOWS
+#   include "../string/conv.hpp"
+#endif
 
 namespace zed {
 
@@ -53,18 +56,27 @@ public:
     bool bind_blob(int one_based_index, const void *data, size_t size, bool transient = false);
     bool bind_int64(int one_based_index, sqlite_int64 n);
     bool bind_null(int one_based_index);
+    bool bind_string_or_null(int one_based_index, const char *psz, bool transient = false);
     template <class String>
     bool bind_string_or_null(int one_based_index, const String &s, bool transient = false);
 
     int get_column_int(int zero_based_index) { return ::sqlite3_column_int(get(), zero_based_index); }
     sqlite_int64 get_column_int64(int zero_based_index) { return ::sqlite3_column_int64(get(), zero_based_index); }
     std::string get_column_text(int zero_based_index);
+#ifdef _Z_OS_WINDOWS
+    std::wstring get_column_text16(int zero_based_index);
+#endif
+    template <typename CharT>
+    void get_column_text(int zero_based_index, std::basic_string<CharT> &dst);
 private:
     friend class sqlite;
     friend class sqlite_qstream;
     explicit sqlite_stmt(sqlite3_stmt *stmt);
 
     bool bind(int one_based_index, const char *ps, int l, bool transient);
+#ifdef _Z_OS_WINDOWS
+    bool bind(int one_based_index, const wchar_t *ps, int l, bool transient);
+#endif
 };
 
 class sqlite_rstream
@@ -98,6 +110,7 @@ public:
 private:
     friend class sqlite;
     friend const sqlite_qstream& operator<<(const sqlite_qstream &qs, int n);
+    friend const sqlite_qstream& operator<<(const sqlite_qstream &qs, const char *psz);
     friend const sqlite_qstream& operator<<(const sqlite_qstream &qs, const std::string &s);
     explicit sqlite_qstream(sqlite3_stmt *stmt);
 
@@ -258,6 +271,12 @@ inline const sqlite_qstream& operator<<(const sqlite_qstream &qs, int n)
     return qs;
 }
 
+inline const sqlite_qstream& operator<<(const sqlite_qstream &qs, const char *psz)
+{
+    qs.m_stmt.bind_string_or_null(qs.index(), psz);
+    return qs;
+}
+
 inline const sqlite_qstream& operator<<(const sqlite_qstream &qs, const std::string &s)
 {
     qs.m_stmt.bind_string_or_null(qs.index(), s);
@@ -309,6 +328,14 @@ inline bool sqlite_stmt::bind(int one_based_index, const char *ps, int l, bool t
     return SQLITE_OK == r;
 }
 
+#ifdef _Z_OS_WINDOWS
+inline bool sqlite_stmt::bind(int one_based_index, const wchar_t *ps, int l, bool transient)
+{
+    int r = ::sqlite3_bind_text16(get(), one_based_index, ps, l, transient ? SQLITE_TRANSIENT : SQLITE_STATIC);
+    return SQLITE_OK == r;
+}
+#endif
+
 inline bool sqlite_stmt::bind_blob(int one_based_index, const void *data, size_t size, bool transient)
 {
     int r = ::sqlite3_bind_blob(get(), one_based_index, data, size, transient ? SQLITE_TRANSIENT : SQLITE_STATIC);
@@ -327,6 +354,14 @@ inline bool sqlite_stmt::bind_null(int one_based_index)
     return SQLITE_OK == r;
 }
 
+inline bool sqlite_stmt::bind_string_or_null(int one_based_index, const char *psz, bool transient)
+{
+    if ('\0' == *psz)
+        return bind_null(one_based_index);
+    else
+        return bind(one_based_index, psz, -1, transient);
+}
+
 template <class String>
 bool sqlite_stmt::bind_string_or_null(int one_based_index, const String &s, bool transient)
 {
@@ -342,6 +377,26 @@ inline std::string sqlite_stmt::get_column_text(int zero_based_index)
     int l = ::sqlite3_column_bytes(get(), zero_based_index);
     return std::string(ps, l);
 }
+
+template <>
+inline void sqlite_stmt::get_column_text<char>(int zero_based_index, std::string &dst)
+{
+    dst = get_column_text(zero_based_index);
+}
+
+#ifdef _Z_OS_WINDOWS
+template <>
+inline void sqlite_stmt::get_column_text<wchar_t>(int zero_based_index, std::wstring &dst)
+{
+    dst = get_column_text16(zero_based_index);
+}
+
+inline std::wstring sqlite_stmt::get_column_text16(int zero_based_index)
+{
+    std::string text = get_column_text(zero_based_index);
+    return multi_byte_to_wide_string(text, CP_UTF8);
+}
+#endif
 
 } // namespace zed
 
