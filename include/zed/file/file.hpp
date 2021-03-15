@@ -13,7 +13,7 @@
 #define ZED_FILE_FILE_HPP
 
 #include <cstdio>
-#include "../build_macros.h"
+#include "../platform_sdk.h"
 #ifdef _Z_OS_WINDOWS
 #   include "../win/handled_resource.hpp"
 #endif
@@ -30,6 +30,10 @@ public:
 #endif
 
     static bool read(path_t path, std::string &dst);
+
+    static bool write(path_t path, const void *data, size_t size);
+    template <class Container>
+    static bool write(path_t path, const Container &data) { return write(path, data.data(), data.size()); }
 };
 
 template <>
@@ -59,6 +63,17 @@ inline bool file::read(path_t path, std::string &dst)
             dst.resize(size);
             return ::ReadFile(file.get(), const_cast<char *>(dst.data()), dst.length(), &size, nullptr);
         }
+    }
+    return false;
+}
+
+inline bool file::write(path_t path, const void *data, size_t size)
+{
+    unique_file file(::CreateFileW(path, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_ARCHIVE, nullptr));
+    if (file)
+    {
+        DWORD written;
+        return ::WriteFile(file.get(), data, size, &written, nullptr);
     }
     return false;
 }
