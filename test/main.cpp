@@ -11,7 +11,7 @@
 #include <gtest/gtest.h>
 #include "zed/net/http_codecs.hpp"
 #include "zed/parsers/ini.hpp"
-#include "zed/log.hpp"
+#include "zed/string/format.hpp"
 
 TEST(HTTPDecoders, DecodesCorrectly)
 {
@@ -58,7 +58,7 @@ TEST(INIParsing, ParsesCorrectly)
 
 TEST(Formatters, FormatsCorrectly)
 {
-    ASSERT_EQ(std::string("Hello, 123!").compare(zed::log_formatter("{}, {}!", "Hello", 123)), 0);
+    ASSERT_EQ(std::string("Hello, 123!").compare(zed::sequence_format("{}, {}!", "Hello", 123)), 0);
 }
 
 int main(int argc, char *argv[])
