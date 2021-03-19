@@ -36,6 +36,7 @@ inline bool isspace(int ch) { return nullptr != ::strchr(ascii_whitespace<char>:
 inline bool islower(int ch) { return 'a' <= ch && ch <= 'z'; }
 inline bool isupper(int ch) { return 'A' <= ch && ch <= 'Z'; }
 inline bool isalpha(int ch) { return islower(ch) || isupper(ch); }
+inline bool isdigit(int ch) { return '0' <= ch && ch <= '9'; }
 
 } // namespace zed
 
