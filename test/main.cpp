@@ -13,9 +13,10 @@
 #include "zed/parsers/ini.hpp"
 #include "zed/string/format.hpp"
 
-TEST(HTTPDecoders, DecodesCorrectly)
+TEST(HTTPCodecs, DecodesAndEncodesCorrectly)
 {
     ASSERT_EQ(zed::decode_uri_component("https%3A%2F%2Fexample.org%2F"), "https://example.org/");
+    ASSERT_EQ(zed::encode_uri_component("https://example.org/"), "https%3A%2F%2Fexample.org%2F");
 }
 
 TEST(StringComparisons, ComparesCorrectly)
