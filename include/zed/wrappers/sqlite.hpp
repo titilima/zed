@@ -62,12 +62,15 @@ public:
 
     int get_column_int(int zero_based_index) { return ::sqlite3_column_int(get(), zero_based_index); }
     sqlite_int64 get_column_int64(int zero_based_index) { return ::sqlite3_column_int64(get(), zero_based_index); }
+    template <typename E, typename = std::enable_if<std::is_enum<E>::value>>
+    E get_column_enum(int zero_based_index) { return static_cast<E>(get_column_int(zero_based_index)); }
     std::string get_column_text(int zero_based_index);
 #ifdef _Z_OS_WINDOWS
     std::wstring get_column_text16(int zero_based_index);
 #endif
     template <typename CharT>
     void get_column_text(int zero_based_index, std::basic_string<CharT> &dst);
+    void get_column_blob(int zero_based_index, std::vector<unsigned char> &dst);
 private:
     friend class sqlite;
     friend class sqlite_qstream;
@@ -89,6 +92,7 @@ private:
     friend class sqlite_qstream;
     friend const sqlite_rstream& operator>>(const sqlite_rstream &rs, int &n);
     friend const sqlite_rstream& operator>>(const sqlite_rstream &rs, std::string &s);
+    friend const sqlite_rstream& operator>>(const sqlite_rstream &rs, std::vector<unsigned char> &b);
     explicit sqlite_rstream(sqlite_stmt &stmt);
 
     int index(void) const;
@@ -311,6 +315,12 @@ inline const sqlite_rstream& operator>>(const sqlite_rstream &rs, std::string &s
     return rs;
 }
 
+inline const sqlite_rstream& operator>>(const sqlite_rstream &rs, std::vector<unsigned char> &b)
+{
+    rs.m_stmt.get_column_blob(rs.index(), b);
+    return rs;
+}
+
 inline sqlite_stmt::sqlite_stmt(sqlite3_stmt *stmt) : unique_resource(stmt)
 {
     ZASSERT(is_valid(get()));
@@ -369,6 +379,14 @@ bool sqlite_stmt::bind_string_or_null(int one_based_index, const String &s, bool
         return bind_null(one_based_index);
     else
         return bind<String>(one_based_index, s, transient);
+}
+
+inline void sqlite_stmt::get_column_blob(int zero_based_index, std::vector<unsigned char> &dst)
+{
+    int size = ::sqlite3_column_bytes(get(), zero_based_index);
+    dst.resize(size);
+    if (size > 0)
+        ::memcpy(dst.data(), ::sqlite3_column_blob(get(), zero_based_index), size);
 }
 
 inline std::string sqlite_stmt::get_column_text(int zero_based_index)
