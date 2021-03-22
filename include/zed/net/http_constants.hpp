@@ -15,14 +15,19 @@
 namespace zed {
 namespace http {
 
-enum class status_code {
-    OK = 200,
+class status_code {
+public:
+    enum {
+        OK = 200,
 
-    BadRequest = 400,
-    Forbidden  = 403,
-    NotFound   = 404,
+        Found = 302,
 
-    InternalServerError = 500
+        BadRequest = 400,
+        Forbidden  = 403,
+        NotFound   = 404,
+
+        InternalServerError = 500
+    };
 };
 
 namespace header_names {
