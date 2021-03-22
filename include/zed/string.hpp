@@ -170,6 +170,25 @@ public:
     }
 
     bool reach_the_end(void) const { return 0 == m_left; }
+
+    const char_type* data(void) const { ZASSERT(!reach_the_end()); return m_ps; }
+
+    string_piece<char_type> take_left_piece(void)
+    {
+        if (m_left > 0)
+        {
+            auto start = m_ps;
+            size_t len = m_left;
+
+            m_ps  += m_left;
+            m_left = 0;
+            return string_piece<char_type>(start, len);
+        }
+        else
+        {
+            return string_piece<char_type>();
+        }
+    }
 private:
     const char_type *m_ps;
     size_t m_left;
@@ -192,6 +211,20 @@ public:
     }
 
     bool reach_the_end(void) const { return *m_psz == '\0'; }
+
+    const char_type* data(void) const { return m_psz; }
+
+    string_piece<char_type> take_left_piece(void)
+    {
+        auto start = m_psz;
+        size_t len = 0;
+        while ('\0' != *m_psz)
+        {
+            ++m_psz;
+            ++len;
+        }
+        return len > 0 ? string_piece<char_type>(start, len) : string_piece<char_type>();
+    }
 private:
     const char_type *m_psz;
 };
@@ -213,6 +246,20 @@ public:
     }
 
     bool reach_the_end(void) const { return *m_psz == '\0'; }
+
+    const char_type* data(void) const { return m_psz; }
+
+    string_piece<char_type> take_left_piece(void)
+    {
+        auto start = m_psz;
+        size_t len = 0;
+        while ('\0' != *m_psz)
+        {
+            ++m_psz;
+            ++len;
+        }
+        return len > 0 ? string_piece<char_type>(start, len) : string_piece<char_type>();
+    }
 private:
     const char_type *m_psz;
 };
