@@ -54,6 +54,8 @@ public:
     template <class Container>
     bool bind_blob(int one_based_index, const Container &c, bool transient = false) { return bind_blob(one_based_index, c.data(), c.size(), transient); }
     bool bind_blob(int one_based_index, const void *data, size_t size, bool transient = false);
+    template <typename E, typename = std::enable_if<std::is_enum<E>::value>>
+    bool bind_enum(int one_based_index, E e) { return bind(one_based_index, static_cast<int>(e)); }
     bool bind_int64(int one_based_index, sqlite_int64 n);
     bool bind_null(int one_based_index);
     bool bind_string_or_null(int one_based_index, const char *psz, bool transient = false);
@@ -91,6 +93,8 @@ public:
 private:
     friend class sqlite_qstream;
     friend const sqlite_rstream& operator>>(const sqlite_rstream &rs, int &n);
+    template <typename E, typename>
+    friend const sqlite_rstream& operator>>(const sqlite_rstream &rs, E &e);
     friend const sqlite_rstream& operator>>(const sqlite_rstream &rs, std::string &s);
     friend const sqlite_rstream& operator>>(const sqlite_rstream &rs, std::vector<unsigned char> &b);
     explicit sqlite_rstream(sqlite_stmt &stmt);
@@ -114,6 +118,8 @@ public:
 private:
     friend class sqlite;
     friend const sqlite_qstream& operator<<(const sqlite_qstream &qs, int n);
+    template <typename E, typename>
+    friend const sqlite_qstream& operator<<(const sqlite_qstream &qs, E e);
     friend const sqlite_qstream& operator<<(const sqlite_qstream &qs, const char *psz);
     friend const sqlite_qstream& operator<<(const sqlite_qstream &qs, const std::string &s);
     explicit sqlite_qstream(sqlite3_stmt *stmt);
@@ -275,6 +281,13 @@ inline const sqlite_qstream& operator<<(const sqlite_qstream &qs, int n)
     return qs;
 }
 
+template <typename E, typename = std::enable_if<std::is_enum<E>::value>>
+inline const sqlite_qstream& operator<<(const sqlite_qstream &qs, E e)
+{
+    qs.m_stmt.bind_enum<E>(qs.index(), e);
+    return qs;
+}
+
 inline const sqlite_qstream& operator<<(const sqlite_qstream &qs, const char *psz)
 {
     qs.m_stmt.bind_string_or_null(qs.index(), psz);
@@ -306,6 +319,13 @@ inline int sqlite_rstream::next(void)
 inline const sqlite_rstream& operator>>(const sqlite_rstream &rs, int &n)
 {
     n = rs.m_stmt.get_column_int(rs.index());
+    return rs;
+}
+
+template <typename E, typename = std::enable_if<std::is_enum<E>::value>>
+inline const sqlite_rstream& operator>>(const sqlite_rstream &rs, E &e)
+{
+    e = rs.m_stmt.get_column_enum<E>(rs.index());
     return rs;
 }
 
