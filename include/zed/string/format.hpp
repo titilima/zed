@@ -22,6 +22,13 @@ namespace zed {
 template <typename... Args>
 std::string sequence_format(const char *fmt, const Args&... args);
 
+struct default_arg_serializer {
+    template <typename T>
+    static void push(std::vector<std::string> &dst, const T &arg) { dst.emplace_back(std::to_string(arg)); }
+    static void push(std::vector<std::string> &dst, const char *psz) { dst.emplace_back(psz); }
+};
+
+template <class Serializer = default_arg_serializer>
 class args_collector final : std::vector<std::string>
 {
 public:
@@ -32,13 +39,9 @@ public:
     using std::vector<std::string>::size;
 private:
     template <typename T>
-    void collect_from(const T &arg) { push(arg); }
+    void collect_from(const T &arg) { Serializer::push(*this, arg); }
     template <typename Arg, typename... Args>
     void collect_from(const Arg &arg, const Args&... args);
-
-    template <typename T>
-    void push(const T &arg) { emplace_back(std::to_string(arg)); }
-    void push(const char *arg) { emplace_back(arg); }
 };
 
 template <typename CharT>
@@ -61,15 +64,19 @@ private:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Implementations
 
-template <typename Arg, typename... Args>
-void args_collector::collect_from(const Arg &arg, const Args&... args)
+template <>
+inline void default_arg_serializer::push<std::string>(std::vector<std::string> &dst, const std::string &s)
 {
-    push(arg);
-    collect_from<Args...>(args...);
+    dst.emplace_back(s);
 }
 
-template <>
-inline void args_collector::push<std::string>(const std::string &arg) { emplace_back(arg); }
+template <class Serializer>
+template <typename Arg, typename... Args>
+void args_collector<Serializer>::collect_from(const Arg &arg, const Args&... args)
+{
+    Serializer::push(*this, arg);
+    collect_from<Args...>(args...);
+}
 
 template <typename CharT>
 template <typename S>
