@@ -35,6 +35,7 @@ public:
 #endif
 
     static bool create_directory(psz_t path_name);
+    static bool exists(psz_t path_name);
     static string_t path_of_file(const string_t &file_name);
 };
 
@@ -60,6 +61,11 @@ inline path::string_t path::path_of_file(const string_t &file_name)
 inline bool path::create_directory(psz_t path_name)
 {
     return ::CreateDirectoryW(path_name, nullptr);
+}
+
+inline bool path::exists(psz_t path_name)
+{
+    return INVALID_FILE_ATTRIBUTES != ::GetFileAttributesW(path_name);
 }
 
 inline path::string_t sys_path::get_app_path(void)
