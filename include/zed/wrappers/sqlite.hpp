@@ -93,9 +93,13 @@ public:
 private:
     friend class sqlite_qstream;
     friend const sqlite_rstream& operator>>(const sqlite_rstream &rs, int &n);
+    friend const sqlite_rstream& operator>>(const sqlite_rstream &rs, sqlite_int64 &n);
     template <typename E, typename>
     friend const sqlite_rstream& operator>>(const sqlite_rstream &rs, E &e);
     friend const sqlite_rstream& operator>>(const sqlite_rstream &rs, std::string &s);
+#ifdef _Z_OS_WINDOWS
+    friend const sqlite_rstream& operator>>(const sqlite_rstream &rs, std::wstring &s);
+#endif
     friend const sqlite_rstream& operator>>(const sqlite_rstream &rs, std::vector<unsigned char> &b);
     explicit sqlite_rstream(sqlite_stmt &stmt);
 
@@ -322,6 +326,12 @@ inline const sqlite_rstream& operator>>(const sqlite_rstream &rs, int &n)
     return rs;
 }
 
+inline const sqlite_rstream& operator>>(const sqlite_rstream &rs, sqlite_int64 &n)
+{
+    n = rs.m_stmt.get_column_int64(rs.index());
+    return rs;
+}
+
 template <typename E, typename = std::enable_if<std::is_enum<E>::value>>
 inline const sqlite_rstream& operator>>(const sqlite_rstream &rs, E &e)
 {
@@ -334,6 +344,14 @@ inline const sqlite_rstream& operator>>(const sqlite_rstream &rs, std::string &s
     s = rs.m_stmt.get_column_text(rs.index());
     return rs;
 }
+
+#ifdef _Z_OS_WINDOWS
+inline const sqlite_rstream& operator>>(const sqlite_rstream &rs, std::wstring &s)
+{
+    s = rs.m_stmt.get_column_text16(rs.index());
+    return rs;
+}
+#endif
 
 inline const sqlite_rstream& operator>>(const sqlite_rstream &rs, std::vector<unsigned char> &b)
 {
