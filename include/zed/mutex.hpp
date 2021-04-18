@@ -32,6 +32,18 @@ public:
     void lock(void) { ::WaitForSingleObject(get(), INFINITE); }
     void unlock(void) { ::ReleaseMutex(get()); }
 };
+
+class recursive_mutex
+{
+public:
+    recursive_mutex(void) { ::InitializeCriticalSection(&m_cs); }
+    ~recursive_mutex(void) { ::DeleteCriticalSection(&m_cs); }
+
+    void lock(void) { ::EnterCriticalSection(&m_cs); }
+    void unlock(void) { ::LeaveCriticalSection(&m_cs); }
+private:
+    CRITICAL_SECTION m_cs;
+};
 #elif defined(_Z_OS_POSIX)
 class mutex
 {
@@ -46,7 +58,8 @@ private:
 };
 #endif // defined(_Z_OS_WINDOWS)
 
-using mutex_guard = std::unique_lock<zed::mutex>;
+using mutex_guard           = std::unique_lock<zed::mutex>;
+using recursive_mutex_guard = std::unique_lock<zed::recursive_mutex>;
 
 } // namespace zed
 
