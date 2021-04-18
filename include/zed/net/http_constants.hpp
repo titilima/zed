@@ -35,6 +35,9 @@ namespace header_names {
 constexpr const char AcceptLanguage[] = "Accept-Language";
 constexpr const char ContentLength[]  = "Content-Length";
 constexpr const char ContentType[]    = "Content-Type";
+constexpr const char Cookie[]         = "Cookie";
+constexpr const char ETag[]           = "ETag";
+constexpr const char IfMatch[]        = "If-Match";
 constexpr const char Referer[]        = "Referer";
 constexpr const char UserAgent[]      = "User-Agent";
 
