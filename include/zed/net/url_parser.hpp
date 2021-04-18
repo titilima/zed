@@ -23,6 +23,8 @@ struct url_parts
     part username, password, host, port;
     part path, query, ref;
     bool is_ipv6 = false;
+
+    bool scheme_is_http_or_https(void) const { return strequ(scheme, "http") || strequ(scheme, "https"); }
 };
 
 bool parse_url(const char *psz, url_parts &dst);
