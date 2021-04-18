@@ -39,6 +39,11 @@ using parse_url_iterator = char_iterator<string_piece<char>>;
 
 inline bool extract_scheme(parse_url_iterator &it, url_parts::part &dst)
 {
+    dst = url_parts::part();
+
+    if (it.reach_the_end())
+        return false;
+
     auto start = it.data();
     size_t len = 0;
     while (!it.reach_the_end())
@@ -55,10 +60,8 @@ inline bool extract_scheme(parse_url_iterator &it, url_parts::part &dst)
         ++len;
     }
 
-    dst = url_parts::part();
     return false;
 }
-
 
 inline bool parse_user_info(parse_url_iterator &it, url_parts::part &username, url_parts::part &password)
 {
