@@ -25,8 +25,9 @@ namespace zed {
 class signal : unique_resource<HANDLE>
 {
 public:
-    signal(void) : unique_resource(::CreateEvent(nullptr, FALSE, FALSE, nullptr)) {}
+    signal(void) : unique_resource(::CreateEvent(nullptr, TRUE, FALSE, nullptr)) {}
 
+    void reset(void) { ::ResetEvent(get()); }
     void notify(void) { ::SetEvent(get()); }
     void wait(void) { ::WaitForSingleObject(get(), INFINITE); }
 };
