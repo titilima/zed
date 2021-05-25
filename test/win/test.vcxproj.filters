@@ -101,5 +101,11 @@
     <ClInclude Include="..\..\include\zed\parsers\ini.hpp">
       <Filter>Header Files\parsers</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\zed\utility.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\zed\container_utilites.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -154,6 +154,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\zed\build_macros.h" />
+    <ClInclude Include="..\..\include\zed\container_utilites.hpp" />
     <ClInclude Include="..\..\include\zed\ctype.hpp" />
     <ClInclude Include="..\..\include\zed\file\file.hpp" />
     <ClInclude Include="..\..\include\zed\file\path.hpp" />
@@ -172,6 +173,7 @@
     <ClInclude Include="..\..\include\zed\string\parser.hpp" />
     <ClInclude Include="..\..\include\zed\string_view.hpp" />
     <ClInclude Include="..\..\include\zed\type_traits.hpp" />
+    <ClInclude Include="..\..\include\zed\utility.hpp" />
     <ClInclude Include="..\..\include\zed\win\handled_resource.hpp" />
     <ClInclude Include="..\..\include\zed\win\hmodule.hpp" />
   </ItemGroup>
