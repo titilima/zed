@@ -35,9 +35,14 @@ public:
     explicit string_piece(const CharT *ps, size_t length) : m_ps(ps), m_length(length) {}
     explicit string_piece(const std::basic_string<CharT> &s) : m_ps(s.data()), m_length(s.length()) {}
 
+    constexpr static auto npos = std::basic_string<CharT>::npos;
+
     const CharT* data(void) const { return m_ps; }
     size_t length(void) const { return m_length; }
     bool empty(void) const { return 0 == m_length; }
+
+    size_t find(CharT ch, size_type pos = 0) const;
+    string_piece<CharT> substr(size_type pos, size_type count = npos) const;
 private:
     const CharT *m_ps = nullptr;
     size_t m_length = 0;
@@ -265,6 +270,28 @@ private:
 };
 
 } // namespace detail
+
+#ifndef _Z_STRING_VIEW_ENABLED
+template <typename CharT>
+size_t string_piece<CharT>::find(CharT ch, size_type pos) const
+{
+    while (pos < m_length)
+    {
+        if (m_ps[pos] == ch)
+            return pos;
+        ++pos;
+    }
+    return npos;
+}
+
+template <typename CharT>
+string_piece<CharT> string_piece<CharT>::substr(size_type pos, size_type count) const
+{
+    if (npos == count)
+        count = m_length;
+    return string_piece<CharT>(m_ps + pos, count - pos);
+}
+#endif // _Z_STRING_VIEW_ENABLED
 
 template <typename S1, typename S2, typename>
 int strcmp(const S1 &s1, const S2 &s2)
