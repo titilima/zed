@@ -12,11 +12,37 @@
 #ifndef ZED_CONTAINER_UTILITES_HPP
 #define ZED_CONTAINER_UTILITES_HPP
 
+#include "./build_macros.h"
 #include <stack>
 #include <queue>
+#include <unordered_map>
 #include <utility>
 
 namespace zed {
+
+/**
+ * Map Helpers
+ */
+
+template <typename MapType>
+const typename MapType::mapped_type* find_value(const MapType &src_map, const typename MapType::key_type &key);
+
+template <typename MapType>
+typename MapType::mapped_type* find_value(MapType &src_map, const typename MapType::key_type &key);
+
+template <typename MapType>
+bool key_exists(const MapType &src_map, const typename MapType::key_type &key);
+
+template <typename MapType>
+typename MapType::mapped_type query_value(
+    const MapType &src_map,
+    const typename MapType::key_type &key,
+    const typename MapType::mapped_type &default_value = typename MapType::mapped_type()
+);
+
+/**
+ * Pop Stuff
+ */
 
 template <class C>
 struct default_container_pop_policy
@@ -35,6 +61,40 @@ typename C::value_type pop_back(C &c);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Implementations
+
+template <typename MapType>
+const typename MapType::mapped_type* find_value(const MapType &src_map, const typename MapType::key_type &key)
+{
+    auto it = src_map.find(key);
+    return src_map.end() != it ? &(it->second) : nullptr;
+}
+
+template <typename MapType>
+typename MapType::mapped_type* find_value(MapType &src_map, const typename MapType::key_type &key)
+{
+    auto it = src_map.find(key);
+    return src_map.end() != it ? &(it->second) : nullptr;
+}
+
+template <typename MapType>
+bool key_exists(const MapType &src_map, const typename MapType::key_type &key)
+{
+#if (_Z_CPP < _Z_CPP_20)
+    return src_map.find(key) != src_map.end();
+#else
+    return src_map.contains(key);
+#endif
+}
+
+template <typename MapType>
+typename MapType::mapped_type query_value(
+    const MapType &src_map,
+    const typename MapType::key_type &key,
+    const typename MapType::mapped_type &default_value)
+{
+    auto it = src_map.find(key);
+    return src_map.end() != it ? it->second : default_value;
+}
 
 template <typename T>
 struct default_container_pop_policy<std::queue<T>>
