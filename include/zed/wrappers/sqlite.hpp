@@ -89,7 +89,7 @@ class sqlite_rstream
 public:
     operator bool() const { return SQLITE_ROW == m_ret; }
 
-    int next(void);
+    bool next(void);
 private:
     friend class sqlite_qstream;
     friend const sqlite_rstream& operator>>(const sqlite_rstream &rs, int &n);
@@ -314,10 +314,11 @@ inline int sqlite_rstream::index(void) const
     return m_index++;
 }
 
-inline int sqlite_rstream::next(void)
+inline bool sqlite_rstream::next(void)
 {
     m_index = 0;
-    return m_ret = m_stmt.step();
+    m_ret = m_stmt.step();
+    return SQLITE_ROW == m_ret;
 }
 
 inline const sqlite_rstream& operator>>(const sqlite_rstream &rs, int &n)
