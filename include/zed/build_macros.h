@@ -37,6 +37,31 @@
 #   error OS is not detected!
 #endif
 
+/**
+ * C++ Versions
+ */
+
+#define _Z_CPP_DEFAULT  0
+#define _Z_CPP_14       1
+#define _Z_CPP_17       2
+#define _Z_CPP_20       3
+
+#ifdef __cplusplus
+#   if defined(_MSC_VER)
+#       include <vcruntime.h>
+#       if defined(_HAS_CXX20) && (_HAS_CXX20)
+#           define _Z_CPP   _Z_CPP_20
+#       elif defined(_HAS_CXX17) && (_HAS_CXX17)
+#           define _Z_CPP   _Z_CPP_17
+#       endif
+#   else
+#       pragma message("TODO: Adjust _Z_CPP.")
+#   endif
+#endif
+#ifndef _Z_CPP
+#   define _Z_CPP   _Z_CPP_DEFAULT
+#endif
+
 /*
  * _Z_STRING_VIEW_ENABLED
  */
