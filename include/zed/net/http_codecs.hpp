@@ -12,9 +12,8 @@
 #ifndef ZED_NET_HTTP_CODECS_HPP
 #define ZED_NET_HTTP_CODECS_HPP
 
-#include <string>
-#include "../ctype.hpp"
-#include "../string.hpp"
+#include <unordered_map>
+#include "../string/algorithm.hpp"
 
 namespace zed {
 
@@ -23,6 +22,10 @@ std::string decode_uri_component(const string_piece<char> &s);
 
 std::string encode_uri_component(const char *psz);
 std::string encode_uri_component(const string_piece<char> &s);
+
+std::string url_encode(const std::unordered_map<std::string, std::string> &form_data);
+
+std::unordered_map<std::string, std::string> url_decode(const string_piece<char> &s);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Implementations
@@ -132,6 +135,45 @@ inline std::string encode_uri_component(const string_piece<char> &s)
 {
     detail::char_iterator it(s);
     return detail::encode_uri_component(it);
+}
+
+inline std::unordered_map<std::string, std::string> url_decode(const string_piece<char> &s)
+{
+    std::unordered_map<std::string, std::string> ret;
+    auto pairs = split(s, "&");
+    for (const auto &pair : pairs)
+    {
+        std::string k, v;
+
+        size_t p = pair.find('=');
+        if (string_piece<char>::npos != p)
+        {
+            k = decode_uri_component(pair.substr(0, p));
+            v = decode_uri_component(pair.substr(p + 1));
+        }
+        else
+        {
+            ret.emplace(decode_uri_component(pair), std::string());
+        }
+
+        ret.emplace(k, v);
+    }
+    return ret;
+}
+
+inline std::string url_encode(const std::unordered_map<std::string, std::string> &form_data)
+{
+    std::string ret;
+
+    for (const auto &it : form_data)
+    {
+        ret.append(encode_uri_component(it.first)).push_back('=');
+        ret.append(encode_uri_component(it.second)).push_back('&');
+    }
+
+    if (!ret.empty())
+        ret.pop_back();
+    return ret;
 }
 
 } // namespace zed
