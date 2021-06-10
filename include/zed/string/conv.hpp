@@ -44,7 +44,7 @@ inline std::wstring multi_byte_to_wide_string(PCSTR ps, int length, UINT cp)
     return ret;
 }
 
-std::string wide_string_to_multi_byte(PCWSTR ps, int length, UINT cp)
+inline std::string wide_string_to_multi_byte(PCWSTR ps, int length, UINT cp)
 {
     std::string ret;
     int r = ::WideCharToMultiByte(cp, 0, ps, length, nullptr, 0, nullptr, nullptr);
