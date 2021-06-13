@@ -23,8 +23,21 @@
 
 namespace zed {
 
+namespace detail {
+
+template <class T>
+class mutex_base
+{
+public:
+    std::unique_lock<T> guard(void);
+protected:
+    mutex_base(void) = default;
+};
+
+} // namespace detail
+
 #if defined(_Z_OS_WINDOWS)
-class mutex : unique_resource<HANDLE>
+class mutex : public detail::mutex_base<mutex>, unique_resource<HANDLE>
 {
 public:
     mutex(void) : unique_resource(::CreateMutex(nullptr, FALSE, nullptr)) {}
@@ -33,7 +46,7 @@ public:
     void unlock(void) { ::ReleaseMutex(get()); }
 };
 
-class recursive_mutex
+class recursive_mutex : public detail::mutex_base<recursive_mutex>
 {
 public:
     recursive_mutex(void) { ::InitializeCriticalSection(&m_cs); }
@@ -45,7 +58,7 @@ private:
     CRITICAL_SECTION m_cs;
 };
 #elif defined(_Z_OS_POSIX)
-class mutex
+class mutex : public detail::mutex_base<mutex>
 {
 public:
     mutex(void) { ::pthread_mutex_init(&m_mutex, nullptr); }
@@ -58,8 +71,15 @@ private:
 };
 #endif // defined(_Z_OS_WINDOWS)
 
-using mutex_guard           = std::unique_lock<zed::mutex>;
-using recursive_mutex_guard = std::unique_lock<zed::recursive_mutex>;
+namespace detail {
+
+template <class T>
+std::unique_lock<T> mutex_base<T>::guard(void)
+{
+    return std::unique_lock<T>(static_cast<T &>(*this));
+}
+
+} // namespace detail
 
 } // namespace zed
 
