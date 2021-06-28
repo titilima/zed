@@ -171,7 +171,6 @@
     <ClInclude Include="..\..\include\zed\string\conv.hpp" />
     <ClInclude Include="..\..\include\zed\string\format.hpp" />
     <ClInclude Include="..\..\include\zed\string\parser.hpp" />
-    <ClInclude Include="..\..\include\zed\string_view.hpp" />
     <ClInclude Include="..\..\include\zed\type_traits.hpp" />
     <ClInclude Include="..\..\include\zed\utility.hpp" />
     <ClInclude Include="..\..\include\zed\win\handled_resource.hpp" />

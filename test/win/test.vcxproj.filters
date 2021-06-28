@@ -80,9 +80,6 @@
     <ClInclude Include="..\..\include\zed\win\hmodule.hpp">
       <Filter>Header Files\win</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\zed\string_view.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\zed\string\format.hpp">
       <Filter>Header Files\string</Filter>
     </ClInclude>
