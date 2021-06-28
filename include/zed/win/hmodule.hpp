@@ -24,11 +24,43 @@ public:
     static std::wstring get_file_name(HMODULE h);
 
     using resource_data = std::tuple<PVOID, DWORD>;
-    static bool get_resource_data(resource_data &dst, HMODULE h, PCTSTR type, int id);
+    template <typename PCSZ>
+    static bool get_resource_data(resource_data &dst, HMODULE h, PCSZ type, PCSZ name);
+    template <typename PCSZ>
+    static bool get_resource_data(resource_data &dst, HMODULE h, PCSZ type, int id);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Implementations
+
+namespace detail {
+
+inline HRSRC find_resource(HMODULE h, PCSTR type, PCSTR name)
+{
+    return ::FindResourceA(h, name, type);
+}
+
+inline HRSRC find_resource(HMODULE h, PCWSTR type, PCWSTR name)
+{
+    return ::FindResourceW(h, name, type);
+}
+
+template <typename PCSZ>
+PCSZ make_int_resource(int id);
+
+template <>
+PCSTR make_int_resource<PCSTR>(int id)
+{
+    return MAKEINTRESOURCEA(id);
+}
+
+template <>
+PCWSTR make_int_resource<PCWSTR>(int id)
+{
+    return MAKEINTRESOURCEW(id);
+}
+
+} // namespace detail
 
 inline std::wstring hmodule::get_file_name(HMODULE h)
 {
@@ -59,9 +91,10 @@ inline std::wstring hmodule::get_file_name(HMODULE h)
     return ret;
 }
 
-inline bool hmodule::get_resource_data(resource_data &dst, HMODULE h, PCTSTR type, int id)
+template <typename PCSZ>
+bool hmodule::get_resource_data(resource_data &dst, HMODULE h, PCSZ type, PCSZ name)
 {
-    HRSRC res = ::FindResource(h, MAKEINTRESOURCE(id), type);
+    HRSRC res = detail::find_resource(h, type, name);
     if (nullptr == res)
         return false;
 
@@ -75,6 +108,12 @@ inline bool hmodule::get_resource_data(resource_data &dst, HMODULE h, PCTSTR typ
 
     dst = std::make_tuple(data, ::SizeofResource(h, res));
     return true;
+}
+
+template <typename PCSZ>
+bool hmodule::get_resource_data(resource_data &dst, HMODULE h, PCSZ type, int id)
+{
+    return get_resource_data(dst, h, type, detail::make_int_resource<PCSZ>(id));
 }
 
 } // namespace zed
