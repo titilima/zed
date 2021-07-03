@@ -27,6 +27,17 @@ struct key_pair {
     key_pair(const K &k, const V &v) : key(k), value(v) {}
 };
 
+template <typename T>
+class scoped_swap
+{
+public:
+    scoped_swap(T &dst, const T &new_val);
+    ~scoped_swap(void);
+private:
+    T &m_dst;
+    const T m_old_val;
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Implementations
 
@@ -34,6 +45,18 @@ template <typename K, typename V>
 key_pair<K, V> key_pair<K, V>::make(const K &k, const V &v)
 {
     return key_pair<K, V>(k, v);
+}
+
+template <typename T>
+scoped_swap<T>::scoped_swap(T &dst, const T &new_val) : m_dst(dst), m_old_val(dst)
+{
+    m_dst = new_val;
+}
+
+template <typename T>
+scoped_swap<T>::~scoped_swap(void)
+{
+    m_dst = m_old_val;
 }
 
 } // namespace zed
