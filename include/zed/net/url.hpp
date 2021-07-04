@@ -2,7 +2,7 @@
 // -------------------------------------------------
 // ZED Kit
 // -------------------------------------------------
-//   File Name: url_parser.hpp
+//   File Name: url.hpp
 //      Author: Ziming Li
 //     Created: 2021-03-22
 // -------------------------------------------------
@@ -31,6 +31,18 @@ bool parse_url(const char *psz, url_parts &dst);
 
 template <class String>
 bool parse_url(const String &s, url_parts &dst);
+
+class url
+{
+public:
+    bool scheme_is(const char *scheme) const { return m_valid ? strequ(m_parts.scheme, scheme) : false; }
+    bool scheme_is_in_http_family(void) const { return scheme_is("http") || scheme_is("https"); }
+    bool scheme_is_file(void) const { return scheme_is("file"); }
+private:
+    bool m_valid;
+    std::string m_string;
+    url_parts m_parts;
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Implementations
