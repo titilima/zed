@@ -12,11 +12,16 @@
 #ifndef ZED_MEMORY_HPP
 #define ZED_MEMORY_HPP
 
+#include <cstring>
 #include <memory>
 #include <type_traits>
 #include <utility>
 
 namespace zed {
+
+/**
+ * unique_resource
+ */
 
 template <typename T>
 struct is_resource
@@ -72,6 +77,30 @@ private:
 
     std::pair<T, Finalizer> m_resource;
 };
+
+/**
+ * Pointer Wrappers
+ */
+
+template <typename T>
+std::unique_ptr<T> wrap_unique(T *p) { return std::unique_ptr<T>(p); }
+
+template <typename T>
+std::shared_ptr<T> wrap_shared(T *p) { return std::shared_ptr<T>(p); }
+
+/**
+ * Type Casting
+ */
+
+template <typename DstType, typename SrcType>
+inline DstType bit_cast(const SrcType &src)
+{
+    static_assert(sizeof(DstType) == sizeof(SrcType));
+
+    DstType dst;
+    memcpy(&dst, &src, sizeof(DstType));
+    return dst;
+}
 
 } // namespace zed
 
