@@ -49,13 +49,13 @@ template <typename PCSZ>
 PCSZ make_int_resource(int id);
 
 template <>
-PCSTR make_int_resource<PCSTR>(int id)
+inline PCSTR make_int_resource<PCSTR>(int id)
 {
     return MAKEINTRESOURCEA(id);
 }
 
 template <>
-PCWSTR make_int_resource<PCWSTR>(int id)
+inline PCWSTR make_int_resource<PCWSTR>(int id)
 {
     return MAKEINTRESOURCEW(id);
 }
