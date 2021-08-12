@@ -83,6 +83,22 @@ private:
  */
 
 template <typename T>
+class ptr_base
+{
+public:
+    T* get(void) const { return m_ptr; }
+
+    T& operator*() const { return *m_ptr; }
+    T* operator->() const { return m_ptr; }
+    operator bool() const { return nullptr != m_ptr; }
+    bool operator!() const { return nullptr == m_ptr; }
+protected:
+    ptr_base(T *ptr) : m_ptr(ptr) {}
+
+    T *m_ptr;
+};
+
+template <typename T>
 std::unique_ptr<T> wrap_unique(T *p) { return std::unique_ptr<T>(p); }
 
 template <typename T>
