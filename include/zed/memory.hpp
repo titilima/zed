@@ -92,6 +92,11 @@ public:
     T* operator->() const { return m_ptr; }
     operator bool() const { return nullptr != m_ptr; }
     bool operator!() const { return nullptr == m_ptr; }
+
+    template <typename U>
+    bool operator==(U *ptr) const { return m_ptr == ptr; }
+    template <typename U>
+    bool operator!=(U *ptr) const { return m_ptr != ptr; }
 protected:
     ptr_base(T *ptr) : m_ptr(ptr) {}
 
