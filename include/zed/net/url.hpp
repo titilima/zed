@@ -24,6 +24,7 @@ struct url_parts
     part path, query, ref;
     bool is_ipv6 = false;
 
+    void reset(void);
     bool scheme_is_http_or_https(void) const { return strequ(scheme, "http") || strequ(scheme, "https"); }
 };
 
@@ -303,12 +304,29 @@ inline bool parse_after_scheme(parse_url_iterator &it, url_parts &dst)
 
 inline bool parse_url(parse_url_iterator &it, url_parts &dst)
 {
+    dst.reset();
     if (!extract_scheme(it, dst.scheme))
         return false;
-    return parse_after_scheme(it, dst);
+    if (dst.scheme_is_http_or_https())
+        return parse_after_scheme(it, dst);
+    parse_path(it, dst);
+    return true;
 }
 
 } // namespace detail
+
+void url_parts::reset(void)
+{
+    scheme = part();
+    username = part();
+    password = part();
+    host = part();
+    port = part();
+    path = part();
+    query = part();
+    ref = part();
+    is_ipv6 = false;
+}
 
 inline bool parse_url(const char *psz, url_parts &dst)
 {
