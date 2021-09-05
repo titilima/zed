@@ -315,7 +315,7 @@ inline bool parse_url(parse_url_iterator &it, url_parts &dst)
 
 } // namespace detail
 
-void url_parts::reset(void)
+inline void url_parts::reset(void)
 {
     scheme = part();
     username = part();
