@@ -12,6 +12,7 @@
 #ifndef ZED_NET_URL_PARSER_HPP
 #define ZED_NET_URL_PARSER_HPP
 
+#include <memory>
 #include "../string.hpp"
 
 namespace zed {
@@ -36,14 +37,14 @@ bool parse_url(const String &s, url_parts &dst);
 class url
 {
 public:
-    url(void) = default;
+    url(void) : m_string(std::make_shared<std::string>()) {}
     url(const std::string &s);
 
-    bool operator==(const url &o) const { return m_string == o.m_string; }
+    bool operator==(const url &o) const { return *m_string == *o.m_string; }
     bool operator!=(const url &o) const { return !(*this == o); }
 
     bool is_valid(void) const { return m_valid; }
-    const std::string& spec(void) const { return m_string; }
+    const std::string& spec(void) const { return *m_string; }
 
     std::string get_scheme(void) const { return get_part(m_parts.scheme); }
     bool scheme_is(const char *scheme) const { return m_valid ? strequ(m_parts.scheme, scheme) : false; }
@@ -60,7 +61,7 @@ private:
     std::string get_part(const url_parts::part &part) const;
 
     bool m_valid = false;
-    std::string m_string;
+    std::shared_ptr<std::string> m_string;
     url_parts m_parts;
 };
 
@@ -342,12 +343,12 @@ bool parse_url(const String &s, url_parts &dst)
     return detail::parse_url(it, dst);
 }
 
-inline url::url(const std::string &s) : m_string(s)
+inline url::url(const std::string &s) : m_string(std::make_shared<std::string>(s))
 {
-    if (parse_url(m_string, m_parts))
+    if (parse_url(*m_string, m_parts))
         m_valid = true;
     else
-        m_string.clear();
+        m_string->clear();
 }
 
 inline std::string url::get_part(const url_parts::part &part) const
