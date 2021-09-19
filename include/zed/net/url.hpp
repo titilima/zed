@@ -27,6 +27,7 @@ struct url_parts
 
     void reset(void);
     bool scheme_is_http_or_https(void) const { return strequ(scheme, "http") || strequ(scheme, "https"); }
+    bool scheme_is_file(void) const { return strequ(scheme, "file"); }
 };
 
 bool parse_url(const char *psz, url_parts &dst);
@@ -296,9 +297,22 @@ inline bool parse_after_scheme(parse_url_iterator &it, url_parts &dst)
         ++it; ++len;
     }
 
-    parse_url_iterator authority(string_piece<char>(start, len));
-    if (!parse_authority(authority, dst))
+    if (dst.scheme_is_http_or_https())
+    {
+        parse_url_iterator authority(string_piece<char>(start, len));
+        if (!parse_authority(authority, dst))
+            return false;
+    }
+    else if (dst.scheme_is_file())
+    {
+        dst.host = string_piece<char>(start, len);
+    }
+    else
+    {
+        ZASSERT(false); // Not reached!
         return false;
+    }
+
     parse_path(it, dst);
     return true;
 }
@@ -308,7 +322,7 @@ inline bool parse_url(parse_url_iterator &it, url_parts &dst)
     dst.reset();
     if (!extract_scheme(it, dst.scheme))
         return false;
-    if (dst.scheme_is_http_or_https())
+    if (dst.scheme_is_http_or_https() || dst.scheme_is_file())
         return parse_after_scheme(it, dst);
     parse_path(it, dst);
     return true;
