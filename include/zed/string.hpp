@@ -42,6 +42,7 @@ public:
     bool empty(void) const { return 0 == m_length; }
 
     size_t find(CharT ch, size_type pos = 0) const;
+    size_t rfind(CharT ch, size_type pos = npos) const;
     string_piece<CharT> substr(size_type pos, size_type count = npos) const;
 private:
     const CharT *m_ps = nullptr;
@@ -282,6 +283,23 @@ size_t string_piece<CharT>::find(CharT ch, size_type pos) const
         ++pos;
     }
     return npos;
+}
+
+template <typename CharT>
+size_t string_piece<CharT>::rfind(CharT ch, size_type pos) const
+{
+    if (0 == m_length)
+        return npos;
+
+    if (pos >= m_length)
+        pos = m_length - 1;
+    while (pos > 0)
+    {
+        if (m_ps[pos] == ch)
+            return pos;
+        --pos;
+    }
+    return m_ps[0] == ch ? 0 : npos;
 }
 
 template <typename CharT>
