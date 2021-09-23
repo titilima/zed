@@ -53,7 +53,7 @@ public:
 
     std::string get_scheme(void) const { return get_part(m_parts.scheme); }
     bool scheme_is(const char *scheme) const { return m_valid ? strequ(scheme_piece(), scheme) : false; }
-    bool scheme_is_in_http_family(void) const { return scheme_is("http") || scheme_is("https"); }
+    bool scheme_is_in_http_family(void) const;
     bool scheme_is_file(void) const { return scheme_is("file"); }
 
     std::string get_username(void) const { return get_part(m_parts.username); }
@@ -64,10 +64,11 @@ public:
     url combine(const std::string &relative) const;
 protected:
     const url_parts& raw_parts(void) const { return m_parts; }
+
+    string_piece<char> piece_of(const url_parts::part &part) const;
 private:
     std::string get_part(const url_parts::part &part) const;
 
-    string_piece<char> piece_of(const url_parts::part &part) const;
     string_piece<char> scheme_piece(void) const { return piece_of(m_parts.scheme); }
     string_piece<char> path_piece(void) const { return piece_of(m_parts.path); }
 
@@ -464,6 +465,14 @@ inline std::string url::get_part(const url_parts::part &part) const
 inline string_piece<char> url::piece_of(const url_parts::part &part) const
 {
     return m_valid ? string_piece<char>(m_string.data() + part.start, part.length) : string_piece<char>();
+}
+
+inline bool url::scheme_is_in_http_family(void) const
+{
+    if (!m_valid)
+        return false;
+    string_piece<char> scheme = piece_of(m_parts.scheme);
+    return strequ(scheme, "http") || strequ(scheme, "https");
 }
 
 } // namespace zed
