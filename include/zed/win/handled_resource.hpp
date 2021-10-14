@@ -28,6 +28,17 @@ struct file_handle_traits
     static constexpr HANDLE invalid_value = INVALID_HANDLE_VALUE;
 };
 
+template <>
+struct default_resource_finalizer<HMENU>
+{
+    void operator()(HMENU h) const { ::DestroyMenu(h); }
+};
+
+struct menu_handle_traits
+{
+    static constexpr HMENU invalid_value = nullptr;
+};
+
 } // namespace zed
 
 #endif // ZED_WIN_HANDLED_RESOURCE_HPP
