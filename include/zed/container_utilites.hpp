@@ -17,11 +17,26 @@
 #include <queue>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 namespace zed {
 
 /**
- * Map Helpers
+ * Policies
+ */
+
+template <class C>
+struct default_container_add_policy {
+    static void process(C &c, const typename C::value_type &val);
+};
+
+template <class C>
+struct default_container_pop_policy {
+    static typename C::reference value_to_pop(C &c);
+};
+
+/**
+ * Map Stuff
  */
 
 template <typename MapType>
@@ -29,6 +44,9 @@ const typename MapType::mapped_type* find_value(const MapType &src_map, const ty
 
 template <typename MapType>
 typename MapType::mapped_type* find_value(MapType &src_map, const typename MapType::key_type &key);
+
+template <typename MapType, typename C, typename P = default_container_add_policy<C>>
+void get_values(C &c, const MapType &src_map);
 
 template <typename MapType>
 bool key_exists(const MapType &src_map, const typename MapType::key_type &key);
@@ -44,12 +62,6 @@ typename MapType::mapped_type query_value(
  * Pop Stuff
  */
 
-template <class C>
-struct default_container_pop_policy
-{
-    static typename C::reference value_to_pop(C &c);
-};
-
 template <class C, typename P = default_container_pop_policy<C>>
 typename C::value_type pop(C &c);
 
@@ -61,6 +73,24 @@ typename C::value_type pop_back(C &c);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Implementations
+
+template <typename T>
+struct default_container_add_policy<std::vector<T>>
+{
+    static void process(std::vector<T> &v, const T &val) { v.emplace_back(val); }
+};
+
+template <typename T>
+struct default_container_pop_policy<std::queue<T>>
+{
+    static T& value_to_pop(std::queue<T> &q) { return q.front(); }
+};
+
+template <typename T>
+struct default_container_pop_policy<std::stack<T>>
+{
+    static T& value_to_pop(std::stack<T> &s) { return s.top(); }
+};
 
 template <typename MapType>
 const typename MapType::mapped_type* find_value(const MapType &src_map, const typename MapType::key_type &key)
@@ -74,6 +104,13 @@ typename MapType::mapped_type* find_value(MapType &src_map, const typename MapTy
 {
     auto it = src_map.find(key);
     return src_map.end() != it ? &(it->second) : nullptr;
+}
+
+template <typename MapType, typename C, typename P>
+void get_values(C &c, const MapType &src_map)
+{
+    for (const auto &[_, v] : src_map)
+        P::process(c, v);
 }
 
 template <typename MapType>
@@ -95,18 +132,6 @@ typename MapType::mapped_type query_value(
     auto it = src_map.find(key);
     return src_map.end() != it ? it->second : default_value;
 }
-
-template <typename T>
-struct default_container_pop_policy<std::queue<T>>
-{
-    static T& value_to_pop(std::queue<T> &q) { return q.front(); }
-};
-
-template <typename T>
-struct default_container_pop_policy<std::stack<T>>
-{
-    static T& value_to_pop(std::stack<T> &s) { return s.top(); }
-};
 
 template <class C, typename P>
 [[nodiscard]] typename C::value_type pop(C &c)
