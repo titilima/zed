@@ -23,6 +23,9 @@ class hmodule
 public:
     static std::wstring get_file_name(HMODULE h);
 
+    template <typename F>
+    static bool get_proc_address(HMODULE h, PCSTR name, F & dst);
+
     using resource_data = std::tuple<PVOID, DWORD>;
     template <typename PCSZ>
     static bool get_resource_data(resource_data &dst, HMODULE h, PCSZ type, PCSZ name);
@@ -89,6 +92,16 @@ inline std::wstring hmodule::get_file_name(HMODULE h)
         ret.resize(size);
     }
     return ret;
+}
+
+template <typename F>
+static bool hmodule::get_proc_address(HMODULE h, PCSTR name, F &dst)
+{
+    FARPROC pfn = ::GetProcAddress(h, name);
+    if (nullptr == pfn)
+        return false;
+    dst = reinterpret_cast<F>(pfn);
+    return true;
 }
 
 template <typename PCSZ>
