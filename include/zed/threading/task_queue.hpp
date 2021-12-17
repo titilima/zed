@@ -20,19 +20,15 @@
 
 namespace zed {
 
+template <class task_t>
 class task_queue
 {
 public:
     task_queue(void) = default;
 
-    class task {
-    public:
-        virtual ~task(void) = default;
-        virtual void run(void) = 0;
-    };
-    void add(task *t);
+    void add(task_t *t);
 
-    using queue_t = std::queue<std::unique_ptr<task>>;
+    using queue_t = std::queue<std::unique_ptr<task_t>>;
     void take(queue_t &dst);
 private:
     zed::mutex m_mutex;
@@ -46,7 +42,11 @@ public:
     task_thread(void);
     virtual ~task_thread(void);
 
-    using task = task_queue::task;
+    class task {
+    public:
+        virtual ~task(void) = default;
+        virtual void run(void) = 0;
+    };
     void add(task *t) { m_queue.add(t); }
 protected:
     virtual void on_enter_loop(void) {}
@@ -56,7 +56,7 @@ private:
     void loop(void);
 
     bool m_running = true;
-    task_queue m_queue;
+    task_queue<task> m_queue;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -64,7 +64,7 @@ private:
 
 namespace detail {
 
-class exit_loop_task final : public task_queue::task
+class exit_loop_task final : public task_thread::task
 {
 public:
     exit_loop_task(bool &running_flag) : m_running_flag(running_flag) {}
@@ -80,14 +80,16 @@ private:
 
 } // namespace detail
 
-inline void task_queue::add(task *t)
+template <class task_t>
+void task_queue<task_t>::add(task_t *t)
 {
     if (auto _ = m_mutex.guard())
         m_tasks.emplace(t);
     m_signal.notify();
 }
 
-inline void task_queue::take(queue_t &dst)
+template <class task_t>
+void task_queue<task_t>::take(queue_t &dst)
 {
     m_signal.wait();
     if (auto _ = m_mutex.guard())
@@ -107,7 +109,7 @@ inline task_thread::~task_thread(void)
 
 inline void task_thread::loop(void)
 {
-    task_queue::queue_t tasks;
+    task_queue<task>::queue_t tasks;
     for (;;)
     {
         m_queue.take(tasks);
