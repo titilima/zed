@@ -28,6 +28,9 @@ public:
 
     void add(task_t *t);
 
+    template <class adder_t>
+    void add(const adder_t &adder);
+
     using queue_t = std::queue<std::unique_ptr<task_t>>;
     void take(queue_t &dst);
 private:
@@ -85,6 +88,15 @@ void task_queue<task_t>::add(task_t *t)
 {
     if (auto _ = m_mutex.guard())
         m_tasks.emplace(t);
+    m_signal.notify();
+}
+
+template <class task_t>
+template <class adder_t>
+void task_queue<task_t>::add(const adder_t &adder)
+{
+    if (auto _ = m_mutex.guard())
+        adder(m_tasks);
     m_signal.notify();
 }
 
