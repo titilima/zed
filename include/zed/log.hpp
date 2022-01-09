@@ -26,10 +26,31 @@ void log(const char *fmt, const Args&... args);
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Implementations
 
+struct log_serializer {
+    template <typename T>
+    static void push(std::vector<std::string> &dst, const T &arg) {
+        static_assert(false, "Not implemented!");
+    }
+
+    static void push(std::vector<std::string> &dst, bool b) {
+        push(dst, b ? "true" : "false");
+    }
+    static void push(std::vector<std::string> &dst, int n) {
+        push(dst, std::to_string(n));
+    }
+    static void push(std::vector<std::string> &dst, const std::string &s) {
+        dst.emplace_back(s);
+    }
+    static void push(std::vector<std::string> &dst, const char *psz) {
+        dst.emplace_back(psz);
+    }
+};
+
 template <typename... Args>
 void log(const char *fmt, const Args&... args)
 {
-    std::string s = sequence_format(fmt, args...);
+    args_collector<log_serializer> ac;
+    std::string s = detail::sequence_format(ac, fmt, args...);
 #ifdef _Z_OS_WINDOWS
     std::wstring ws = multi_byte_to_wide_string(s);
     ws.append(L"\r\n");
