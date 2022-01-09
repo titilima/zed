@@ -32,12 +32,11 @@ template <class Serializer = default_arg_serializer>
 class args_collector final : std::vector<std::string>
 {
 public:
-    template <typename... Args>
-    args_collector(const Args&... args) { collect_from<Args...>(args...); }
+    args_collector(void) = default;
 
     using std::vector<std::string>::at;
     using std::vector<std::string>::size;
-private:
+
     template <typename T>
     void collect_from(const T &arg) { Serializer::push(*this, arg); }
     template <typename Arg, typename... Args>
@@ -63,6 +62,27 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Implementations
+
+namespace detail {
+
+template <class ArgsCollector, typename... Args>
+std::string sequence_format(ArgsCollector &ac, const char *fmt, const Args&... args)
+{
+    ac.collect_from(args...);
+
+    size_t idx = 0;
+    const auto callback = [&ac, &idx](const std::string &)
+    {
+        std::string ret;
+        if (idx < ac.size())
+            ret = ac.at(idx);
+        ++idx;
+        return ret;
+    };
+    return formatter_impl<char>(fmt).format(callback);
+}
+
+}
 
 template <>
 inline void default_arg_serializer::push<std::string>(std::vector<std::string> &dst, const std::string &s)
@@ -133,18 +153,8 @@ std::basic_string<CharT> formatter_impl<CharT>::format(const part_formatter &for
 template <typename... Args>
 std::string sequence_format(const char *fmt, const Args&... args)
 {
-    args_collector ac(args...);
-
-    size_t idx = 0;
-    const auto callback = [&ac, &idx](const std::string &)
-    {
-        std::string ret;
-        if (idx < ac.size())
-            ret = ac.at(idx);
-        ++idx;
-        return ret;
-    };
-    return formatter_impl<char>(fmt).format(callback);
+    args_collector ac;
+    return detail::sequence_format(ac, fmt, args...);
 }
 
 } // namespace zed
