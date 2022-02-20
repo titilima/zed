@@ -24,7 +24,7 @@ public:
     static std::wstring get_file_name(HMODULE h);
 
     template <typename F>
-    static bool get_proc_address(HMODULE h, PCSTR name, F & dst);
+    static bool get_proc_address(HMODULE h, PCSTR name, F &dst);
 
     using resource_data = std::tuple<PVOID, DWORD>;
     template <typename PCSZ>
