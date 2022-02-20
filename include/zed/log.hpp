@@ -35,8 +35,23 @@ struct log_serializer {
     static void push(std::vector<std::string> &dst, bool b) {
         push(dst, b ? "true" : "false");
     }
+    static void push(std::vector<std::string> &dst, short s) {
+        push(dst, std::to_string(s));
+    }
+    static void push(std::vector<std::string> &dst, unsigned short us) {
+        push(dst, std::to_string(us));
+    }
     static void push(std::vector<std::string> &dst, int n) {
         push(dst, std::to_string(n));
+    }
+    static void push(std::vector<std::string> &dst, unsigned int u) {
+        push(dst, std::to_string(u));
+    }
+    static void push(std::vector<std::string> &dst, long l) {
+        push(dst, std::to_string(l));
+    }
+    static void push(std::vector<std::string> &dst, unsigned long ul) {
+        push(dst, std::to_string(ul));
     }
     static void push(std::vector<std::string> &dst, const std::string &s) {
         dst.emplace_back(s);
